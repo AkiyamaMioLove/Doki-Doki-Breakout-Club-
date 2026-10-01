@@ -1,0 +1,4417 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Doki Doki Breakout Club! // 诗篇心跳狂想曲</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;700;800;900&family=Quicksand:wght@600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --ddlc-pink: #ff7aa2;
+      --ddlc-deep-pink: #e0527f;
+      --ddlc-monika-green: #2ecc71;
+      --ddlc-yuri-purple: #9b59b6;
+      --ddlc-sayori-coral: #ff6b81;
+      --ddlc-natsuki-strawberry: #ff477e;
+    }
+
+    body {
+      font-family: 'M PLUS Rounded 1c', 'Quicksand', sans-serif;
+      background-color: #ffdbe7;
+      /* DDLC 经典粉白波点壁纸 */
+      background-image: 
+        radial-gradient(#ff9fc2 18%, transparent 19%),
+        radial-gradient(#ffb5cf 18%, transparent 19%);
+      background-size: 36px 36px;
+      background-position: 0 0, 18px 18px;
+      overflow: hidden;
+      touch-action: none;
+      user-select: none;
+    }
+
+    .font-ddlc {
+      font-family: 'M PLUS Rounded 1c', sans-serif;
+    }
+
+    .font-mono-glitch {
+      font-family: 'Share Tech Mono', monospace;
+    }
+
+    /* 视觉小说精致框体 */
+    .vn-frame {
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(255, 242, 247, 0.96) 100%);
+      border: 3px solid #ff7aa2;
+      box-shadow: 0 8px 24px rgba(224, 82, 127, 0.22), inset 0 0 10px rgba(255, 122, 162, 0.12);
+    }
+
+    .vn-nametag {
+      background: linear-gradient(135deg, #ff7aa2 0%, #ff5c8a 100%);
+      box-shadow: 0 4px 10px rgba(255, 92, 138, 0.35);
+    }
+
+    .canvas-container-ddlc {
+      background: #ffffff;
+      border: 5px solid #ffffff;
+      box-shadow: 
+        0 14px 40px rgba(224, 82, 127, 0.28),
+        0 0 0 4px #ff7aa2,
+        0 0 0 8px rgba(255, 255, 255, 0.85);
+      position: relative;
+    }
+
+    @keyframes heartbeat {
+      0% { transform: scale(1); }
+      14% { transform: scale(1.18); }
+      28% { transform: scale(1); }
+      42% { transform: scale(1.15); }
+      70% { transform: scale(1); }
+    }
+    .heart-beat {
+      animation: heartbeat 1.3s infinite ease-in-out;
+      display: inline-block;
+    }
+
+    .glitch-scanlines {
+      background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.35) 50%);
+      background-size: 100% 4px;
+      pointer-events: none;
+    }
+
+    /* 崩坏阶段 2 ~ 5 渐进式视觉样式 */
+    @keyframes text-jitter {
+      0% { transform: translate(0, 0); }
+      20% { transform: translate(-1px, 1px); }
+      40% { transform: translate(1px, -1px); }
+      60% { transform: translate(-1.5px, 0); }
+      80% { transform: translate(1px, 1px); }
+      100% { transform: translate(0, 0); }
+    }
+
+    @keyframes chromatic-aberration {
+      0% { filter: drop-shadow(-1px 0 rgba(0, 255, 255, 0.6)) drop-shadow(1px 0 rgba(255, 0, 80, 0.6)); }
+      50% { filter: drop-shadow(1.5px 0 rgba(0, 255, 255, 0.7)) drop-shadow(-1.5px 0 rgba(255, 0, 80, 0.7)); }
+      100% { filter: drop-shadow(-1px 0 rgba(0, 255, 255, 0.6)) drop-shadow(1px 0 rgba(255, 0, 80, 0.6)); }
+    }
+
+    .corrupt-jitter {
+      animation: text-jitter 0.12s infinite;
+    }
+
+    .corrupt-chromatic {
+      animation: chromatic-aberration 0.2s infinite ease-in-out;
+    }
+
+    /* 崩坏阶段 3: 诡异暗粉紫色调与边缘裂纹 */
+    .modal-stage-3 {
+      background: linear-gradient(135deg, rgba(255, 245, 248, 0.98) 0%, rgba(243, 232, 255, 0.96) 100%) !important;
+      border: 3px solid #9333ea !important;
+      box-shadow: 0 0 35px rgba(147, 51, 234, 0.45) !important;
+    }
+
+    /* 崩坏阶段 4: 深渊血紫压迫感与屏幕慢震 */
+    .modal-stage-4 {
+      background: linear-gradient(135deg, rgba(30, 10, 25, 0.97) 0%, rgba(18, 5, 15, 0.98) 100%) !important;
+      border: 3px solid #dc2626 !important;
+      box-shadow: 0 0 50px rgba(220, 38, 38, 0.65), inset 0 0 25px rgba(220, 38, 38, 0.3) !important;
+      animation: text-jitter 0.25s infinite;
+    }
+
+    /* 崩坏阶段 5: 终末黑红代码毁灭风格 */
+    .modal-stage-5 {
+      background: rgba(10, 2, 6, 0.98) !important;
+      border: 3px solid #ff003c !important;
+      box-shadow: 0 0 65px rgba(255, 0, 60, 0.85), inset 0 0 35px rgba(255, 0, 60, 0.4) !important;
+      animation: text-jitter 0.08s infinite;
+    }
+
+    /* 阶段全屏血腥/暗角遮罩 */
+    .vignette-corrupt-3 {
+      box-shadow: inset 0 0 70px rgba(147, 51, 234, 0.35);
+    }
+    .vignette-corrupt-4 {
+      box-shadow: inset 0 0 110px rgba(220, 38, 38, 0.55);
+    }
+    .vignette-corrupt-5 {
+      box-shadow: inset 0 0 150px rgba(0, 0, 0, 0.9), inset 0 0 60px rgba(255, 0, 60, 0.7);
+    }
+
+    /* 全屏幕崩坏恐怖视觉体系 (Full-Page System Terror) */
+    @keyframes terror-violent-shake {
+      0% { transform: translate(0, 0) scale(1); }
+      15% { transform: translate(-12px, 8px) skewX(2deg) scale(1.01); }
+      30% { transform: translate(14px, -10px) skewX(-3deg) scale(0.99); }
+      45% { transform: translate(-16px, -12px) skewX(4deg) scale(1.02); }
+      60% { transform: translate(12px, 14px) skewX(-2deg) scale(0.99); }
+      75% { transform: translate(-10px, 6px) scale(1.01); }
+      90% { transform: translate(8px, -8px) scale(1); }
+      100% { transform: translate(0, 0) scale(1); }
+    }
+
+    @keyframes terror-strobe-invert {
+      0%, 100% { filter: invert(0) contrast(1); }
+      15% { filter: invert(1) contrast(3) hue-rotate(180deg); }
+      30% { filter: invert(0) contrast(1.2); }
+      45% { filter: invert(0.9) contrast(2.5) saturate(3); }
+      60% { filter: invert(0) contrast(1); }
+      75% { filter: invert(1) contrast(4); }
+    }
+
+    @keyframes terror-crt-slice {
+      0% { clip-path: inset(0 0 0 0); transform: translate(0); }
+      20% { clip-path: inset(18% 0 52% 0); transform: translate(-25px, 2px); }
+      40% { clip-path: inset(62% 0 15% 0); transform: translate(30px, -3px); }
+      60% { clip-path: inset(5% 0 78% 0); transform: translate(-18px, 0); }
+      80% { clip-path: inset(40% 0 35% 0); transform: translate(22px, 4px); }
+      100% { clip-path: inset(0 0 0 0); transform: translate(0); }
+    }
+
+    .terror-page-active-3 {
+      animation: terror-violent-shake 0.18s infinite, terror-strobe-invert 0.5s 1;
+    }
+
+    .terror-page-active-4 {
+      animation: terror-violent-shake 0.12s infinite;
+      filter: contrast(1.4) drop-shadow(4px 0 0 rgba(255,0,50,0.8)) drop-shadow(-4px 0 0 rgba(0,255,255,0.8));
+    }
+
+    .terror-page-active-5 {
+      animation: terror-violent-shake 0.08s infinite;
+      filter: contrast(2) saturate(0) brightness(0.9);
+      background-color: #050002 !important;
+    }
+
+    @keyframes fatal-strobe-hyper {
+      0% { background: #000000; filter: invert(0); }
+      20% { background: #ff003c; filter: invert(1); }
+      40% { background: #050002; filter: invert(0); }
+      60% { background: #ffffff; filter: invert(1); }
+      80% { background: #7f001b; filter: invert(0); }
+      100% { background: #000000; filter: invert(1); }
+    }
+
+    @keyframes fatal-text-drift {
+      0% { transform: scale(1) translate(0, 0) skew(0deg); opacity: 0.95; }
+      25% { transform: scale(1.15) translate(-18px, 12px) skew(-8deg); opacity: 1; text-shadow: 6px 0 #00ffff, -6px 0 #ff003c; }
+      50% { transform: scale(0.9) translate(14px, -15px) skew(6deg); opacity: 0.9; text-shadow: -8px 0 #00ffff, 8px 0 #ff003c; }
+      75% { transform: scale(1.22) translate(-22px, -8px) skew(-5deg); opacity: 1; text-shadow: 10px 0 #00ffff, -10px 0 #ff003c; }
+      100% { transform: scale(1) translate(0, 0) skew(0deg); opacity: 0.95; }
+    }
+
+    .fatal-crash-active {
+      animation: fatal-strobe-hyper 0.07s infinite !important;
+    }
+
+    .fatal-corrupt-text {
+      animation: fatal-text-drift 0.06s infinite !important;
+      font-family: 'Share Tech Mono', 'M PLUS Rounded 1c', monospace;
+      user-select: none;
+    }
+
+    /* 满屏漂浮幽灵 Just Monika 烙印 */
+    .just-monika-ghost {
+      position: absolute;
+      font-family: 'Share Tech Mono', monospace;
+      color: rgba(255, 0, 50, 0.85);
+      text-shadow: 0 0 8px rgba(255, 0, 50, 0.9), 2px 2px 0 #000;
+      font-weight: 900;
+      pointer-events: none;
+      z-index: 99;
+      user-select: none;
+      animation: text-jitter 0.08s infinite;
+    }
+
+    /* 关卡进行中持续崩坏视觉样式 (第二次死亡后激活，进入下一关重置) */
+    .level-corrupt-stage-2 {
+      box-shadow: 
+        0 14px 40px rgba(224, 82, 127, 0.45),
+        inset 0 0 55px rgba(180, 20, 80, 0.3),
+        0 0 0 4px #e0527f,
+        0 0 0 8px rgba(255, 230, 240, 0.85) !important;
+      animation: level-corrupt-pulse 3.5s infinite ease-in-out;
+    }
+
+    .level-corrupt-stage-3 {
+      box-shadow: 
+        0 14px 50px rgba(147, 51, 234, 0.5),
+        inset 0 0 85px rgba(130, 10, 110, 0.45),
+        0 0 0 4px #9333ea,
+        0 0 0 8px rgba(235, 215, 255, 0.85) !important;
+      animation: level-corrupt-jitter 2.8s infinite ease-in-out;
+    }
+
+    .level-corrupt-stage-4 {
+      box-shadow: 
+        0 14px 65px rgba(220, 38, 38, 0.65),
+        inset 0 0 120px rgba(190, 0, 40, 0.6),
+        0 0 0 4px #dc2626,
+        0 0 0 8px rgba(255, 190, 190, 0.85) !important;
+      animation: text-jitter 0.16s infinite;
+    }
+
+    @keyframes level-corrupt-pulse {
+      0%, 100% { filter: contrast(1.02) saturate(0.96); }
+      50% { filter: contrast(1.15) saturate(1.18) hue-rotate(-10deg); }
+    }
+
+    @keyframes level-corrupt-jitter {
+      0%, 86%, 100% { transform: translate(0, 0); filter: contrast(1.08); }
+      88% { transform: translate(-2.5px, 1.5px); filter: contrast(1.3) drop-shadow(-2px 0 cyan); }
+      91% { transform: translate(2px, -1.5px); filter: contrast(1.25) drop-shadow(2px 0 red); }
+      94% { transform: translate(-1px, 2px); }
+    }
+
+    /* 无边框沉浸铺满模式 */
+    .mode-borderless {
+      position: fixed !important;
+      inset: 0 !important;
+      max-width: none !important;
+      max-height: none !important;
+      width: 100vw !important;
+      height: 100vh !important;
+      border-radius: 0 !important;
+      border: none !important;
+      box-shadow: none !important;
+      z-index: 45 !important;
+    }
+
+    /* 文学部甜美滑块样式 */
+    input[type=range].ddlc-slider {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 7px;
+      background: #fed7e2;
+      border-radius: 9999px;
+      outline: none;
+      transition: background 0.2s;
+    }
+    input[type=range].ddlc-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: #ff5c8a;
+      cursor: pointer;
+      border: 2.5px solid #ffffff;
+      box-shadow: 0 2px 6px rgba(224, 82, 127, 0.45);
+      transition: transform 0.15s ease-in-out;
+    }
+    input[type=range].ddlc-slider::-webkit-slider-thumb:hover {
+      transform: scale(1.18);
+    }
+  </style>
+</head>
+
+<body class="w-screen h-screen flex flex-col items-center justify-center p-2 sm:p-3 text-slate-700 relative">
+
+  <!-- Fullscreen Screen Terror Flash & Crash Overlay -->
+  <div id="screenTerrorBlackout" class="fixed inset-0 bg-black z-[100] pointer-events-none opacity-0 transition-opacity duration-75"></div>
+  <div id="screenTerrorSliceLayer" class="fixed inset-0 pointer-events-none z-[90] hidden"></div>
+  <div id="justMonikaGhostContainer" class="fixed inset-0 pointer-events-none z-[95] overflow-hidden hidden"></div>
+
+  <div id="finalDeathCrashOverlay" class="fixed inset-0 z-[200] hidden flex flex-col items-center justify-center p-4 overflow-hidden pointer-events-auto">
+    <div id="fatalTextCluster" class="w-full h-full flex flex-col items-center justify-center relative font-black text-center"></div>
+  </div>
+
+  <!-- Top DDLC Stationery HUD -->
+  <header id="mainHeader" class="w-full max-w-4xl vn-frame rounded-2xl px-4 sm:px-5 py-2 mb-2 flex items-center justify-between z-10 transition-all duration-300">
+    <!-- Left: Level, Score, HighScore & Balls -->
+    <div class="flex items-center space-x-3 sm:space-x-5">
+      <div class="bg-pink-500 text-white px-2.5 py-1 rounded-lg text-center shadow-sm">
+        <span class="text-[9px] font-bold tracking-wider block opacity-85">关卡</span>
+        <span id="levelDisplay" class="text-xs sm:text-sm font-black font-ddlc">1 / 5</span>
+      </div>
+      <div>
+        <span class="text-[10px] font-bold text-pink-500 block leading-tight">得分</span>
+        <span id="scoreDisplay" class="text-lg sm:text-xl font-black text-pink-600 font-ddlc tracking-wide">0</span>
+      </div>
+      <div class="hidden sm:block border-l border-pink-200 pl-3">
+        <span class="text-[10px] font-bold text-pink-400 block leading-tight">最高</span>
+        <span id="highScoreDisplay" class="text-base font-bold text-pink-400 font-ddlc">0</span>
+      </div>
+      <div class="bg-rose-50 px-2.5 py-1 rounded-md border border-pink-200">
+        <span id="ballCountDisplay" class="text-xs font-bold text-pink-600 font-ddlc">球数 1</span>
+      </div>
+      <!-- Combo Badge -->
+      <div id="comboContainer" class="hidden sm:flex items-center bg-pink-100 px-2 py-0.5 rounded border border-pink-300 opacity-0 transition-all duration-200">
+        <span id="comboDisplay" class="text-xs font-black text-pink-600 font-ddlc">x1</span>
+      </div>
+    </div>
+
+    <!-- Center: Pierce Mode or Club Title -->
+    <div class="flex flex-col items-center">
+      <div id="pierceIndicator" class="hidden items-center bg-purple-700 text-white px-3 py-0.5 rounded-full shadow animate-pulse">
+        <span class="text-xs font-bold font-ddlc tracking-wider">贯穿模式 (<span id="pierceTimeDisplay">2.0s</span>)</span>
+      </div>
+      <div id="clubLogoDefault" class="hidden md:flex flex-col items-center">
+        <h1 class="text-sm font-black tracking-wider text-pink-500 font-ddlc">Doki Doki Literature Club</h1>
+        <span id="levelNameDisplay" class="text-[10px] text-pink-400 font-bold">第一关：发间蝴蝶结</span>
+      </div>
+    </div>
+
+    <!-- Right: Lives & Controls -->
+    <div class="flex items-center space-x-3">
+      <div class="flex flex-col items-end">
+        <span class="text-[10px] font-bold text-pink-500 block leading-tight">生命</span>
+        <div id="livesContainer" class="flex space-x-1 mt-0.5"></div>
+      </div>
+      <div class="flex items-center space-x-1 border-l border-pink-200 pl-2.5">
+        <button id="btnSound" class="h-7 px-2 rounded bg-pink-50 hover:bg-pink-100 border border-pink-300 text-pink-600 text-xs font-bold transition active:scale-95" title="音效开关">
+          声音
+        </button>
+        <button id="btnMusic" class="h-7 px-2 rounded bg-pink-50 hover:bg-pink-100 border border-pink-300 text-pink-600 text-xs font-bold transition active:scale-95" title="BGM音乐开关">
+          音乐
+        </button>
+        <button id="btnSettings" class="h-7 px-2 rounded bg-pink-50 hover:bg-pink-100 border border-pink-300 text-pink-600 text-xs font-bold transition active:scale-95" title="设置">
+          设置
+        </button>
+        <button id="btnPause" class="h-7 px-2 rounded bg-pink-50 hover:bg-pink-100 border border-pink-300 text-pink-600 text-xs font-bold transition active:scale-95" title="暂停 (ESC)">
+          暂停
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Game Canvas Container -->
+  <main id="gameWrapper" class="canvas-container-ddlc rounded-2xl sm:rounded-3xl overflow-hidden w-full max-w-4xl aspect-[4/3] max-h-[78vh] flex items-center justify-center transition-all duration-300 relative">
+    <canvas id="gameCanvas" class="w-full h-full"></canvas>
+
+    <!-- Hidden Desktop Audio File Input -->
+    <input type="file" id="bgmFileInput" accept="audio/*" class="hidden">
+
+    <!-- Drag & Drop Visual Hint Overlay -->
+    <div id="dropMusicHint" class="absolute inset-0 bg-pink-600/85 backdrop-blur-sm z-50 flex flex-col items-center justify-center text-white pointer-events-none opacity-0 transition-opacity duration-200">
+      <div class="vn-frame bg-white/95 text-pink-600 p-6 rounded-2xl border-4 border-dashed border-pink-400 text-center shadow-2xl scale-105">
+        <span class="text-4xl block mb-2">🎵</span>
+        <h2 class="text-lg font-black font-ddlc mb-1">松开鼠标即可置入桌面音乐</h2>
+        <p class="text-xs text-pink-400 font-bold">Dan Salvato - Dreams of Love and Literature.mp3</p>
+      </div>
+    </div>
+
+    <!-- Floating HUD bar only displayed in borderless/fullscreen mode -->
+    <div id="floatingQuickHud" class="hidden absolute top-3 right-4 z-50 flex items-center space-x-2 bg-white/95 px-3 py-1.5 rounded-lg border border-pink-300 shadow">
+      <button id="btnFloatSettings" class="text-xs font-bold text-pink-600 hover:text-pink-800 px-2 py-1 bg-pink-50 rounded">设置</button>
+      <button id="btnFloatPause" class="text-xs font-bold text-pink-600 hover:text-pink-800 px-2 py-1 bg-pink-50 rounded">暂停</button>
+      <button id="btnExitBorderless" class="text-xs font-bold text-pink-600 hover:text-pink-800 px-2 py-1 bg-pink-50 rounded">退出全屏</button>
+    </div>
+
+    <!-- Scanline glitch overlay (shown on ball loss) -->
+    <div id="glitchOverlay" class="absolute inset-0 glitch-scanlines pointer-events-none opacity-0 transition-opacity duration-150 z-20"></div>
+
+    <!-- Launch Hint -->
+    <div id="launchHint" class="absolute pointer-events-none text-center transition-all duration-300 opacity-0">
+      <div class="vn-frame px-5 py-2 rounded-full shadow border border-pink-400">
+        <p class="font-bold text-pink-600 text-xs sm:text-sm tracking-wider">
+          按 [ 空格键 ] 或点击画布发射小球
+        </p>
+      </div>
+    </div>
+
+    <!-- DDLC Title Screen Overlay -->
+    <div id="titleScreenOverlay" class="absolute inset-0 bg-pink-900/10 backdrop-blur-[2px] flex flex-col items-center justify-center z-40 p-4 transition-all duration-500">
+      <div class="vn-frame rounded-2xl p-7 max-w-md w-full text-center relative border-3 border-pink-400 shadow-2xl backdrop-blur-md bg-white/90 flex flex-col items-center">
+        <div class="mb-5">
+          <span class="text-xs font-bold text-pink-500 tracking-widest uppercase block mb-1">Literature Club Breakout</span>
+          <h1 class="text-3xl sm:text-4xl font-black text-pink-600 font-ddlc tracking-wide">
+            Doki Doki Breakout!
+          </h1>
+          <div id="bgmStatusTag" class="mt-2 inline-flex items-center space-x-1.5 bg-pink-100/90 text-pink-600 px-2.5 py-0.5 rounded-full text-[10px] font-bold border border-pink-200">
+            <span class="animate-pulse">🎵</span>
+            <span>BGM: Dan Salvato - Dreams of Love and Literature</span>
+          </div>
+        </div>
+
+        <div class="w-full space-y-2.5">
+          <button id="btnStartGame" class="w-full py-3 px-6 rounded-xl font-black text-white bg-pink-500 hover:bg-pink-600 transition active:scale-95 text-base font-ddlc tracking-wider shadow">
+            开始部活
+          </button>
+          <button id="btnLoadDesktopMusic" class="w-full py-2 px-4 rounded-xl font-bold text-white bg-gradient-to-r from-pink-500 to-rose-400 hover:from-pink-600 hover:to-rose-500 transition active:scale-95 text-xs sm:text-sm font-ddlc shadow-sm border border-pink-300 flex items-center justify-center space-x-1.5">
+            <span>📂 载入桌面音乐 (或直接拖拽进窗口)</span>
+          </button>
+          <button id="btnTitleLevelSelect" class="w-full py-2 px-4 rounded-xl font-bold text-pink-600 bg-white hover:bg-pink-50 transition active:scale-95 text-xs sm:text-sm font-ddlc border border-pink-300">
+            选择关卡
+          </button>
+          <button id="btnTitleInstructions" class="w-full py-2 px-4 rounded-xl font-bold text-pink-600 bg-white hover:bg-pink-50 transition active:scale-95 text-xs sm:text-sm font-ddlc border border-pink-300">
+            游戏说明
+          </button>
+          <button id="btnTitleSettings" class="w-full py-2 px-4 rounded-xl font-bold text-pink-600 bg-white hover:bg-pink-50 transition active:scale-95 text-xs sm:text-sm font-ddlc border border-pink-300">
+            系统设定
+          </button>
+        </div>
+
+        <p class="text-[11px] text-pink-400 font-semibold mt-5">
+          按 [ 空格键 ] 发射 / [ ESC ] 暂停
+        </p>
+      </div>
+    </div>
+
+    <!-- DDLC ESC Pause Modal Dialog -->
+    <div id="pauseMenuOverlay" class="absolute inset-0 bg-pink-950/45 backdrop-blur-[4px] flex flex-col items-center justify-center hidden z-40 transition-all p-4">
+      <div class="relative w-full max-w-xs vn-frame rounded-2xl p-6 shadow-2xl border-3 border-pink-400 text-center animate-in fade-in zoom-in-95 duration-150">
+        <div class="absolute -top-3.5 left-5 vn-nametag text-white px-3 py-0.5 rounded-full font-bold text-xs tracking-wider border border-white shadow">
+          暂停
+        </div>
+
+        <h3 class="text-lg font-black text-pink-600 font-ddlc tracking-wide mb-3 mt-1">
+          部活暂停
+        </h3>
+
+        <div class="bg-pink-100/70 border border-pink-200 rounded-lg py-1 px-2.5 mb-4 text-xs font-bold text-pink-700">
+          <span id="pauseLevelLabel">第 1 / 5 关</span>
+        </div>
+
+        <div class="space-y-2 font-ddlc text-xs sm:text-sm">
+          <button id="btnResumeGame" class="w-full py-2.5 px-4 rounded-xl font-bold text-white bg-pink-500 hover:bg-pink-600 transition active:scale-95 shadow">
+            继续游戏
+          </button>
+          <button id="btnPauseInstructions" class="w-full py-2 px-4 rounded-xl font-bold text-pink-700 bg-white hover:bg-pink-50 transition active:scale-95 border border-pink-300">
+            游戏说明
+          </button>
+          <button id="btnPauseSettings" class="w-full py-2 px-4 rounded-xl font-bold text-pink-700 bg-white hover:bg-pink-50 transition active:scale-95 border border-pink-300">
+            系统设定
+          </button>
+          <button id="btnRestartCurrentLevel" class="w-full py-2 px-4 rounded-xl font-bold text-amber-700 bg-amber-50 hover:bg-amber-100 transition active:scale-95 border border-amber-300">
+            本关重新开始
+          </button>
+          <button id="btnRestartWholeGame" class="w-full py-2 px-4 rounded-xl font-bold text-rose-700 bg-rose-50 hover:bg-rose-100 transition active:scale-95 border border-rose-300">
+            从头重新开始
+          </button>
+          <button id="btnReturnToTitle" class="w-full py-2 px-4 rounded-xl font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition active:scale-95 border border-slate-300">
+            返回主题界面
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- DDLC Level Clear / Game Over / Victory Modal -->
+    <div id="modalOverlay" class="absolute inset-0 bg-pink-950/40 backdrop-blur-[3px] flex flex-col items-center justify-center hidden z-30 transition-all p-4">
+      <div id="modalCard" class="relative w-full max-w-md vn-frame rounded-2xl p-6 sm:p-7 pt-8 shadow-2xl border-3 border-pink-400">
+        <div id="modalSpeakerTag" class="absolute -top-3.5 left-6 vn-nametag text-white px-4 py-0.5 rounded-full font-bold text-xs tracking-wider border border-white shadow">
+          <span id="modalSpeakerName">部活</span>
+        </div>
+
+        <h2 id="modalTitle" class="text-xl sm:text-2xl font-black text-pink-600 mb-1.5 font-ddlc tracking-wide">
+          关卡达成
+        </h2>
+        <p id="modalSubtitle" class="text-pink-800 text-xs sm:text-sm leading-relaxed mb-4 font-semibold">
+          诗篇已经敲碎完毕，准备好翻开下一篇了吗？
+        </p>
+
+        <!-- Stats Container -->
+        <div id="modalStats" class="hidden grid-cols-2 gap-2.5 mb-4 bg-pink-100/70 p-3 rounded-xl border border-pink-300 text-left font-ddlc text-xs sm:text-sm">
+          <div class="bg-white/90 p-2.5 rounded-lg border border-pink-200">
+            <span class="text-pink-400 block text-[11px] font-bold">最终得分</span>
+            <span id="finalScore" class="text-pink-600 text-lg font-black">0</span>
+          </div>
+          <div class="bg-white/90 p-2.5 rounded-lg border border-pink-200">
+            <span class="text-pink-400 block text-[11px] font-bold">最高连击</span>
+            <span id="maxCombo" class="text-rose-500 text-lg font-black">x0</span>
+          </div>
+        </div>
+
+        <button id="modalActionBtn" class="w-full py-3 px-5 rounded-xl font-bold text-white bg-pink-500 hover:bg-pink-600 transition active:scale-95 shadow text-sm font-ddlc tracking-wider">
+          <span>进入下一关</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- DDLC Instructions Modal Overlay -->
+    <div id="instructionsOverlay" class="absolute inset-0 bg-pink-950/45 backdrop-blur-[3px] flex flex-col items-center justify-center hidden z-40 transition-all p-4">
+      <div class="relative w-full max-w-md vn-frame rounded-2xl p-6 sm:p-7 pt-8 shadow-2xl border-3 border-pink-400 max-h-[90vh] overflow-y-auto">
+        <div class="absolute -top-3.5 left-6 vn-nametag text-white px-4 py-0.5 rounded-full font-bold text-xs tracking-wider border border-white shadow">
+          游戏说明
+        </div>
+
+        <div class="flex items-center justify-between mb-3">
+          <h2 class="text-lg font-black text-pink-600 font-ddlc tracking-wide">
+            文学部活指引
+          </h2>
+          <button id="btnCloseInstructionsX" class="text-pink-400 hover:text-pink-600 font-bold text-base p-1" title="关闭">✕</button>
+        </div>
+
+        <div class="space-y-3.5 text-xs font-semibold text-pink-900 leading-relaxed font-ddlc">
+          <!-- 1. 关卡设定说明 -->
+          <div class="bg-white/85 p-3 rounded-xl border border-pink-200 shadow-sm">
+            <h3 class="text-pink-600 font-black mb-1.5 flex items-center justify-between text-xs sm:text-sm">
+              <span>关卡章节（全篇共 5 关）</span>
+              <span class="text-[11px] text-pink-400 font-bold">每关 200+ 书砖</span>
+            </h3>
+            <p class="text-slate-600 text-[11px] mb-2 leading-relaxed">
+              全篇收录 5 篇形象化图样诗章，书砖密度高，击碎时可积累丰厚连击：
+            </p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-1.5 text-[11px]">
+              <div class="bg-pink-50/80 px-2 py-1.5 rounded border border-pink-200">
+                <span class="font-bold text-pink-600">第一关：</span>发间蝴蝶结 (214砖)
+              </div>
+              <div class="bg-pink-50/80 px-2 py-1.5 rounded border border-pink-200">
+                <span class="font-bold text-pink-600">第二关：</span>猫耳纸杯蛋糕 (274砖)
+              </div>
+              <div class="bg-pink-50/80 px-2 py-1.5 rounded border border-pink-200">
+                <span class="font-bold text-pink-600">第三关：</span>典雅茶会 (253砖)
+              </div>
+              <div class="bg-pink-50/80 px-2 py-1.5 rounded border border-pink-200">
+                <span class="font-bold text-pink-600">第四关：</span>文学部集 (323砖)
+              </div>
+              <div class="bg-pink-50/80 px-2 py-1.5 rounded border border-pink-200 sm:col-span-2">
+                <span class="font-bold text-pink-600">第五关：</span>终章 · 永恒心跳誓约 (258砖)
+              </div>
+            </div>
+          </div>
+
+          <!-- 2. 四大标志物奖励 -->
+          <div class="bg-white/85 p-3 rounded-xl border border-pink-200 shadow-sm">
+            <h3 class="text-pink-600 font-black mb-2 text-xs sm:text-sm">
+              专属标志物掉落
+            </h3>
+            <div class="space-y-2 text-[11px]">
+              <div class="flex items-start space-x-2 bg-emerald-50/70 p-2 rounded-lg border border-emerald-200">
+                <div class="w-3.5 h-3.5 rounded-full bg-emerald-500 shrink-0 mt-0.5"></div>
+                <div>
+                  <div class="font-bold text-emerald-800">翡翠丝带心（极稀有）</div>
+                  <div class="text-slate-600">恢复 1 点心之誓约生命值。生命已满时直接转化为 +300 分奖励。</div>
+                </div>
+              </div>
+
+              <div class="flex items-start space-x-2 bg-purple-50/70 p-2 rounded-lg border border-purple-200">
+                <div class="w-3.5 h-3.5 rounded-full bg-purple-500 shrink-0 mt-0.5"></div>
+                <div>
+                  <div class="font-bold text-purple-800">裁纸美工刀</div>
+                  <div class="text-slate-600">触发 2 秒超能贯穿模式，光球泛起紫晶利刃剑芒，直接切碎并穿透沿途所有书砖而不反弹。</div>
+                </div>
+              </div>
+
+              <div class="flex items-start space-x-2 bg-rose-50/70 p-2 rounded-lg border border-rose-200">
+                <div class="w-3.5 h-3.5 rounded-full bg-rose-500 shrink-0 mt-0.5"></div>
+                <div>
+                  <div class="font-bold text-rose-800">猫耳草莓纸杯蛋糕</div>
+                  <div class="text-slate-600">拾取后立刻向场上补充发射 +1 颗弹球，增援多球狂欢。</div>
+                </div>
+              </div>
+
+              <div class="flex items-start space-x-2 bg-pink-50/70 p-2 rounded-lg border border-pink-200">
+                <div class="w-3.5 h-3.5 rounded-full bg-pink-500 shrink-0 mt-0.5"></div>
+                <div>
+                  <div class="font-bold text-pink-800">珊瑚粉大蝴蝶结</div>
+                  <div class="text-slate-600">将当前场上所有弹球数量瞬间翻倍，造成全屏大范围破砖。</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 3. 操作指引 -->
+          <div class="bg-white/85 p-2.5 rounded-xl border border-pink-200 text-[11px] text-slate-600 flex justify-between">
+            <span>挡板移动：左右方向键 / A D / 鼠标滑动</span>
+            <span>发射：空格 / 点击</span>
+          </div>
+        </div>
+
+        <button id="btnCloseInstructions" class="mt-4 w-full py-2.5 px-4 rounded-xl font-bold text-white bg-pink-500 hover:bg-pink-600 transition active:scale-95 text-xs font-ddlc shadow">
+          知道了
+        </button>
+      </div>
+    </div>
+
+    <!-- DDLC Level Select Modal Overlay -->
+    <div id="levelSelectOverlay" class="absolute inset-0 bg-pink-950/45 backdrop-blur-[3px] flex flex-col items-center justify-center hidden z-40 transition-all p-4">
+      <div class="relative w-full max-w-sm vn-frame rounded-2xl p-6 sm:p-7 pt-8 shadow-2xl border-3 border-pink-400">
+        <div class="absolute -top-3.5 left-6 vn-nametag text-white px-4 py-0.5 rounded-full font-bold text-xs tracking-wider border border-white shadow">
+          关卡选择
+        </div>
+
+        <div class="flex items-center justify-between mb-3">
+          <h2 class="text-lg font-black text-pink-600 font-ddlc tracking-wide">
+            选择关卡章节
+          </h2>
+          <button id="btnCloseLevelSelectX" class="text-pink-400 hover:text-pink-600 font-bold text-base p-1" title="关闭">✕</button>
+        </div>
+
+        <p class="text-xs text-pink-700 font-semibold mb-4">
+          可直接跳转至已探索过的最高关卡
+        </p>
+
+        <div id="levelSelectList" class="space-y-2 font-ddlc text-xs sm:text-sm max-h-[60vh] overflow-y-auto pr-1"></div>
+
+        <button id="btnCloseLevelSelect" class="mt-4 w-full py-2.5 px-4 rounded-xl font-bold text-pink-600 bg-white hover:bg-pink-50 transition active:scale-95 text-xs font-ddlc border border-pink-300">
+          返回
+        </button>
+      </div>
+    </div>
+
+    <!-- DDLC Settings Modal Overlay -->
+    <div id="settingsOverlay" class="absolute inset-0 bg-pink-950/45 backdrop-blur-[3px] flex flex-col items-center justify-center hidden z-40 transition-all p-4">
+      <div class="relative w-full max-w-md vn-frame rounded-2xl p-6 sm:p-7 pt-8 shadow-2xl border-3 border-pink-400 max-h-[92vh] overflow-y-auto">
+        <div class="absolute -top-3.5 left-6 vn-nametag text-white px-4 py-0.5 rounded-full font-bold text-xs tracking-wider border border-white shadow">
+          系统设定
+        </div>
+
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-lg font-black text-pink-600 font-ddlc tracking-wide">
+            环境设定
+          </h2>
+          <button id="btnCloseSettingsX" class="text-pink-400 hover:text-pink-600 font-bold text-base p-1" title="关闭">✕</button>
+        </div>
+
+        <div class="space-y-3.5 text-xs font-semibold text-pink-900">
+          <!-- 1. Display Mode Options -->
+          <div class="bg-white/80 p-3 rounded-xl border border-pink-200">
+            <label class="block text-pink-600 font-bold mb-1.5 flex items-center justify-between">
+              <span>画面模式</span>
+              <span id="displayModeBadge" class="text-[11px] text-pink-400 font-normal">窗口模式</span>
+            </label>
+            <div class="grid grid-cols-3 gap-2">
+              <button data-mode="window" class="display-mode-btn py-1.5 px-2 rounded-lg border-2 border-pink-400 bg-pink-100 text-pink-700 font-bold transition text-xs">
+                窗口
+              </button>
+              <button data-mode="borderless" class="display-mode-btn py-1.5 px-2 rounded-lg border-2 border-pink-200 bg-white hover:bg-pink-50 text-pink-600 font-bold transition text-xs">
+                无边框
+              </button>
+              <button data-mode="fullscreen" class="display-mode-btn py-1.5 px-2 rounded-lg border-2 border-pink-200 bg-white hover:bg-pink-50 text-pink-600 font-bold transition text-xs">
+                全屏
+              </button>
+            </div>
+          </div>
+
+          <!-- 2. Ball Speed Slider -->
+          <div class="bg-white/80 p-3 rounded-xl border border-pink-200">
+            <div class="flex items-center justify-between mb-1">
+              <span class="text-pink-600 font-bold">小球基础球速</span>
+              <span id="ballSpeedVal" class="text-pink-500 font-bold font-mono">1.0x</span>
+            </div>
+            <input id="sliderBallSpeed" type="range" min="0.5" max="2.0" step="0.1" value="1.0" class="ddlc-slider">
+          </div>
+
+          <!-- 3. Drop Rate Slider -->
+          <div class="bg-white/80 p-3 rounded-xl border border-pink-200">
+            <div class="flex items-center justify-between mb-1">
+              <span class="text-pink-600 font-bold">道具掉落率</span>
+              <span id="dropRateVal" class="text-pink-500 font-bold font-mono">18%</span>
+            </div>
+            <input id="sliderDropRate" type="range" min="0" max="0.30" step="0.02" value="0.18" class="ddlc-slider">
+          </div>
+
+          <!-- 4. Sensitivity Slider -->
+          <div class="bg-white/80 p-3 rounded-xl border border-pink-200">
+            <div class="flex items-center justify-between mb-1">
+              <span class="text-pink-600 font-bold">挡板灵敏度</span>
+              <span id="sensitivityVal" class="text-pink-500 font-bold font-mono">1.0x</span>
+            </div>
+            <input id="sliderSensitivity" type="range" min="0.5" max="2.0" step="0.1" value="1.0" class="ddlc-slider">
+          </div>
+        </div>
+
+        <div class="mt-4 grid grid-cols-2 gap-2.5">
+          <button id="btnResetSettings" class="py-2 px-3 rounded-xl font-bold text-pink-600 bg-pink-100 hover:bg-pink-200 transition active:scale-95 text-xs font-ddlc border border-pink-300">
+            恢复默认
+          </button>
+          <button id="btnCloseSettings" class="py-2 px-3 rounded-xl font-bold text-white bg-pink-500 hover:bg-pink-600 transition active:scale-95 text-xs font-ddlc shadow">
+            完成
+          </button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    /**
+     * DDLCBgmController - 纯 Web Audio 自研多轨音乐合成引擎 + 本地原曲 MP3 真实变调崩坏系统
+     */
+    class DDLCBgmController {
+      constructor() {
+        this.trackName = 'Dreams of Love and Literature';
+        this.composer = 'Dan Salvato';
+        this.bpm = 100;
+        this.muted = false;
+        this.isPlaying = false;
+        this.ctx = null;
+
+        // 本地原生音频支持（用户桌面 MP3 直载）
+        this.hasCustomFile = false;
+        this.audioEl = new Audio();
+        this.audioEl.loop = true;
+        this.audioEl.crossOrigin = 'anonymous';
+        this.mediaSourceNode = null;
+
+        // 核心音高/速度崩坏状态机
+        this.stage = 1;
+        this.baseRate = 1.0;
+        this.targetRate = 1.0;
+        this.currentRate = 1.0;
+        this.wobblePhase = 0;
+        this.wobbleAmp = 0;
+
+        // 突发升调抽搐脉冲与丢包微卡顿
+        this.glitchPulseTimer = 0;
+        this.isGlitchSpikeActive = false;
+        this.stutterTimer = 0;
+        this.isStuttering = false;
+        this.isTapeStopping = false;
+
+        // 乐曲多轨音序排程器
+        this.schedulerTimer = null;
+        this.nextNoteTime = 0;
+        this.currentStep = 0;
+        this.totalSteps = 128;
+        this.scheduleAheadTime = 0.18;
+        this.lookaheadMs = 25;
+
+        this.masterGain = null;
+        this.masterFilter = null;
+
+        this.initScoreData();
+        this.setupAutoplayUnblockers();
+        this.setupAudioElementWarp();
+      }
+
+      setupAudioElementWarp() {
+        // 关闭原生变调保护，使改变 playbackRate 时真实产生黑胶唱片/磁带式的升降调变调音效
+        const el = this.audioEl;
+        el.preservesPitch = false;
+        el.mozPreservesPitch = false;
+        el.webkitPreservesPitch = false;
+      }
+
+      loadFromUserFile(file) {
+        if (!file) return;
+        this.initAudioContext();
+        try {
+          const objectUrl = URL.createObjectURL(file);
+          this.audioEl.src = objectUrl;
+          this.hasCustomFile = true;
+
+          // 将 AudioElement 接入 Web Audio 处理图谱
+          if (!this.mediaSourceNode && this.ctx) {
+            try {
+              this.mediaSourceNode = this.ctx.createMediaElementSource(this.audioEl);
+              this.mediaSourceNode.connect(this.masterFilter);
+            } catch (err) {
+              console.warn('MediaElementSource already attached', err);
+            }
+          }
+
+          // 停止合成器音序排程，全面切为真实桌面文件原生播放
+          if (this.schedulerTimer) {
+            clearTimeout(this.schedulerTimer);
+            this.schedulerTimer = null;
+          }
+
+          this.audioEl.play().then(() => {
+            this.isPlaying = true;
+          }).catch(() => {
+            this.isPlaying = false;
+          });
+
+          // 更新标题徽章
+          const tag = document.getElementById('bgmStatusTag');
+          if (tag) {
+            tag.innerHTML = `<span class="animate-pulse">✨</span><span>已载入桌面原声: ${file.name}</span>`;
+            tag.classList.add('bg-emerald-100', 'text-emerald-700', 'border-emerald-300');
+          }
+        } catch (e) {
+          console.error('Failed to load user audio', e);
+        }
+      }
+
+      initScoreData() {
+        // C4 ~ C6 常用频率映射表
+        const N = {
+          REST: 0,
+          C2: 65.41, E2: 82.41, F2: 87.31, G2: 98.00, A2: 110.00, B2: 123.47,
+          C3: 130.81, D3: 146.83, E3: 164.81, F3: 174.61, G3: 196.00, A3: 220.00, B3: 246.94,
+          C4: 261.63, D4: 293.66, E4: 329.63, F4: 349.23, G4: 392.00, A4: 440.00, B4: 493.88,
+          C5: 523.25, D5: 587.33, E5: 659.25, F5: 698.46, G5: 783.99, A5: 880.00, B5: 987.77,
+          C6: 1046.50, D6: 1174.66
+        };
+        this.notes = N;
+
+        // 《Dreams of Love and Literature》16小节经典完整主旋律 (八分音符步进)
+        // 格式：[stepIndex, noteFreq, durationInEighths]
+        this.melodyEvents = [
+          // 小节 1 - C大调
+          [0, N.C5, 1], [1, N.E5, 1], [2, N.G5, 1], [3, N.E5, 1], [4, N.C5, 1], [5, N.D5, 1], [6, N.E5, 2],
+          // 小节 2 - Am
+          [8, N.A4, 1], [9, N.C5, 1], [10, N.E5, 1], [11, N.C5, 1], [12, N.A4, 1], [13, N.B4, 1], [14, N.C5, 2],
+          // 小节 3 - F
+          [16, N.F4, 1], [17, N.A4, 1], [18, N.C5, 1], [19, N.A4, 1], [20, N.F4, 1], [21, N.G4, 1], [22, N.A4, 2],
+          // 小节 4 - G
+          [24, N.G4, 1], [25, N.B4, 1], [26, N.D5, 1], [27, N.B4, 1], [28, N.G4, 1], [29, N.A4, 1], [30, N.B4, 2],
+
+          // 小节 5 - C大调 (副句展开)
+          [32, N.E5, 1], [33, N.G5, 1], [34, N.C6, 2], [36, N.B5, 1], [37, N.A5, 1], [38, N.G5, 2],
+          // 小节 6 - Am
+          [40, N.E5, 1], [41, N.F5, 0.5], [41.5, N.E5, 0.5], [42, N.D5, 1], [43, N.C5, 1], [44, N.E5, 2], [46, N.D5, 2],
+          // 小节 7 - F
+          [48, N.C5, 1], [49, N.D5, 1], [50, N.E5, 1], [51, N.F5, 1], [52, N.A5, 2], [54, N.G5, 2],
+          // 小节 8 - G
+          [56, N.E5, 1], [57, N.D5, 1], [58, N.C5, 1], [59, N.D5, 1], [60, N.D5, 2], [62, N.G4, 2],
+
+          // 小节 9 - C大调 (灵动副歌高潮)
+          [64, N.G5, 1.5], [65.5, N.E5, 0.5], [66, N.G5, 1], [67, N.C6, 1], [68, N.B5, 1], [69, N.A5, 1], [70, N.G5, 2],
+          // 小节 10 - Am
+          [72, N.E5, 1.5], [73.5, N.C5, 0.5], [74, N.E5, 1], [75, N.A5, 1], [76, N.G5, 1], [77, N.F5, 1], [78, N.E5, 2],
+          // 小节 11 - F
+          [80, N.F5, 1], [81, N.G5, 1], [82, N.A5, 1], [83, N.C6, 1], [84, N.B5, 1], [85, N.A5, 1], [86, N.G5, 1], [87, N.F5, 1],
+          // 小节 12 - G
+          [88, N.E5, 1], [89, N.F5, 1], [90, N.G5, 2], [92, N.D5, 2], [94, N.G4, 2],
+
+          // 小节 13 - C大调
+          [96, N.C5, 1], [97, N.D5, 1], [98, N.E5, 2], [100, N.G5, 1], [101, N.A5, 1], [102, N.G5, 2],
+          // 小节 14 - Am
+          [104, N.A5, 1], [105, N.B5, 1], [106, N.C6, 2], [108, N.B5, 1], [109, N.A5, 1], [110, N.E5, 2],
+          // 小节 15 - F
+          [112, N.F5, 1], [113, N.A5, 1], [114, N.C6, 2], [116, N.D6, 1], [117, N.C6, 1], [118, N.A5, 2],
+          // 小节 16 - G
+          [120, N.G5, 1], [121, N.A5, 1], [122, N.B5, 2], [124, N.C6, 4]
+        ];
+
+        // 和弦根音与吉他/电钢琴伴奏配置 (每小节 8 个八分音符)
+        // 0: C, 1: Am, 2: F, 3: G
+        this.chordProgression = [
+          { bass: N.C2, chord: [N.E4, N.G4, N.C5] }, // bar 0 (C)
+          { bass: N.A2, chord: [N.C4, N.E4, N.A4] }, // bar 1 (Am)
+          { bass: N.F2, chord: [N.A3, N.C4, N.F4] }, // bar 2 (F)
+          { bass: N.G2, chord: [N.B3, N.D4, N.G4] }, // bar 3 (G)
+          { bass: N.C2, chord: [N.E4, N.G4, N.C5] }, // bar 4
+          { bass: N.A2, chord: [N.C4, N.E4, N.A4] }, // bar 5
+          { bass: N.F2, chord: [N.A3, N.C4, N.F4] }, // bar 6
+          { bass: N.G2, chord: [N.B3, N.D4, N.G4] }, // bar 7
+          { bass: N.C2, chord: [N.E4, N.G4, N.C5] }, // bar 8
+          { bass: N.A2, chord: [N.C4, N.E4, N.A4] }, // bar 9
+          { bass: N.F2, chord: [N.A3, N.C4, N.F4] }, // bar 10
+          { bass: N.G2, chord: [N.B3, N.D4, N.G4] }, // bar 11
+          { bass: N.C2, chord: [N.E4, N.G4, N.C5] }, // bar 12
+          { bass: N.A2, chord: [N.C4, N.E4, N.A4] }, // bar 13
+          { bass: N.F2, chord: [N.A3, N.C4, N.F4] }, // bar 14
+          { bass: N.G2, chord: [N.B3, N.D4, N.G4] }  // bar 15
+        ];
+      }
+
+      initAudioContext() {
+        if (!this.ctx) {
+          const AudioCtx = window.AudioContext || window.webkitAudioContext;
+          if (AudioCtx) {
+            this.ctx = new AudioCtx();
+            this.masterFilter = this.ctx.createBiquadFilter();
+            this.masterFilter.type = 'lowpass';
+            this.masterFilter.frequency.setValueAtTime(18000, this.ctx.currentTime);
+
+            this.masterGain = this.ctx.createGain();
+            this.masterGain.gain.setValueAtTime(0.48, this.ctx.currentTime);
+
+            this.masterFilter.connect(this.masterGain);
+            this.masterGain.connect(this.ctx.destination);
+          }
+        }
+        if (this.ctx && this.ctx.state === 'suspended') {
+          this.ctx.resume().catch(() => {});
+        }
+      }
+
+      setupAutoplayUnblockers() {
+        const unlock = () => {
+          this.initAudioContext();
+          if (!this.muted && !this.isPlaying) {
+            this.play();
+          }
+        };
+
+        // 监听所有可能的用户交互以无缝解封播放
+        ['pointerdown', 'keydown', 'touchstart', 'click'].forEach(evt => {
+          window.addEventListener(evt, unlock, { once: false, passive: true });
+        });
+
+        // 尝试页面就绪时即刻播放
+        if (document.readyState === 'complete') {
+          unlock();
+        } else {
+          window.addEventListener('load', unlock, { once: true });
+        }
+      }
+
+      play() {
+        this.initAudioContext();
+        if (!this.ctx) return;
+        if (this.ctx.state === 'suspended') {
+          this.ctx.resume().catch(() => {});
+        }
+        if (this.isPlaying) return;
+        this.isPlaying = true;
+
+        if (this.hasCustomFile && this.audioEl.src) {
+          this.audioEl.play().catch(() => {});
+          return;
+        }
+
+        this.nextNoteTime = this.ctx.currentTime + 0.05;
+        this.currentStep = 0;
+        this.runScheduler();
+      }
+
+      pause() {
+        this.isPlaying = false;
+        if (this.hasCustomFile && this.audioEl) {
+          this.audioEl.pause();
+        }
+        if (this.schedulerTimer) {
+          clearTimeout(this.schedulerTimer);
+          this.schedulerTimer = null;
+        }
+      }
+
+      toggleMute() {
+        this.muted = !this.muted;
+        if (this.muted) {
+          if (this.audioEl) this.audioEl.muted = true;
+          if (this.masterGain && this.ctx) {
+            this.masterGain.gain.setValueAtTime(0, this.ctx.currentTime);
+          }
+        } else {
+          this.initAudioContext();
+          if (this.audioEl) this.audioEl.muted = false;
+          if (this.masterGain && this.ctx) {
+            this.masterGain.gain.setValueAtTime(0.48, this.ctx.currentTime);
+          }
+          if (!this.isPlaying) this.play();
+        }
+        return this.muted;
+      }
+
+      runScheduler() {
+        if (!this.isPlaying || !this.ctx) return;
+
+        // 提前调度缓冲区内的音符
+        while (this.nextNoteTime < this.ctx.currentTime + this.scheduleAheadTime) {
+          this.scheduleStep(this.currentStep, this.nextNoteTime);
+          const eighthNoteSec = (60 / (this.bpm * Math.max(0.25, this.currentRate))) * 0.5;
+          this.nextNoteTime += eighthNoteSec;
+          this.currentStep = (this.currentStep + 1) % this.totalSteps;
+        }
+
+        this.schedulerTimer = setTimeout(() => this.runScheduler(), this.lookaheadMs);
+      }
+
+      scheduleStep(step, time) {
+        if (this.isStuttering || this.isTapeStopping) return;
+
+        const rate = this.currentRate;
+        const barIndex = Math.floor(step / 8) % 16;
+        const beatInBar = step % 8; // 0 ~ 7 (八分音符)
+        const chordData = this.chordProgression[barIndex];
+
+        // 1. 旋律轨 (Glockenspiel / Sweet Flute Lead)
+        for (const ev of this.melodyEvents) {
+          if (Math.abs(ev[0] - step) < 0.1) {
+            const freq = ev[1] * rate;
+            const duration = ev[2] * (60 / (this.bpm * rate)) * 0.5;
+            this.playLeadNote(freq, time, duration);
+          }
+        }
+
+        // 2. 伴奏电钢琴/轻吉他音色 (EPiano & Guitar Chords on upbeat & downbeat)
+        if (beatInBar === 2 || beatInBar === 6) {
+          // 反拍弹奏三和弦
+          chordData.chord.forEach((freq, idx) => {
+            this.playChordNote(freq * rate, time + idx * 0.012, 0.22);
+          });
+        }
+
+        // 3. 灵动贝斯线 (Bouncy Bass)
+        if (beatInBar === 0 || beatInBar === 4) {
+          const bassFreq = (beatInBar === 0 ? chordData.bass : chordData.bass * 1.5) * rate;
+          this.playBassNote(bassFreq, time, 0.28);
+        }
+
+        // 4. 清爽打击乐 (Soft Kick, Snare/Clap & Shaker)
+        // 柔和底鼓 (Beat 0, 4)
+        if (beatInBar === 0 || beatInBar === 4) {
+          this.playSoftKick(time);
+        }
+        // 响弦/拍手 (Beat 2, 6)
+        if (beatInBar === 2 || beatInBar === 6) {
+          this.playSnare(time);
+        }
+        // 均匀沙锤/闭镲 (Every eighth note)
+        this.playShaker(time);
+      }
+
+      playLeadNote(freq, time, duration) {
+        if (!this.ctx || freq <= 0) return;
+        const osc = this.ctx.createOscillator();
+        const overtone = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(freq, time);
+
+        // 钟琴高八度闪烁泛音
+        overtone.type = 'sine';
+        overtone.frequency.setValueAtTime(freq * 2.0, time);
+
+        gain.gain.setValueAtTime(0.24, time);
+        gain.gain.exponentialRampToValueAtTime(0.0001, time + duration);
+
+        osc.connect(gain);
+        overtone.connect(gain);
+        gain.connect(this.masterFilter);
+
+        osc.start(time);
+        overtone.start(time);
+        osc.stop(time + duration);
+        overtone.stop(time + duration);
+      }
+
+      playChordNote(freq, time, duration) {
+        if (!this.ctx) return;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, time);
+
+        gain.gain.setValueAtTime(0.11, time);
+        gain.gain.exponentialRampToValueAtTime(0.0001, time + duration);
+
+        osc.connect(gain);
+        gain.connect(this.masterFilter);
+
+        osc.start(time);
+        osc.stop(time + duration);
+      }
+
+      playBassNote(freq, time, duration) {
+        if (!this.ctx) return;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(freq, time);
+
+        gain.gain.setValueAtTime(0.28, time);
+        gain.gain.exponentialRampToValueAtTime(0.0001, time + duration);
+
+        osc.connect(gain);
+        gain.connect(this.masterFilter);
+
+        osc.start(time);
+        osc.stop(time + duration);
+      }
+
+      playSoftKick(time) {
+        if (!this.ctx) return;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(110, time);
+        osc.frequency.exponentialRampToValueAtTime(38, time + 0.12);
+
+        gain.gain.setValueAtTime(0.3, time);
+        gain.gain.exponentialRampToValueAtTime(0.001, time + 0.12);
+
+        osc.connect(gain);
+        gain.connect(this.masterFilter);
+        osc.start(time);
+        osc.stop(time + 0.12);
+      }
+
+      playSnare(time) {
+        if (!this.ctx) return;
+        // 噪声与短促打击音混合
+        const bufferSize = Math.floor(this.ctx.sampleRate * 0.08);
+        const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+        const data = buffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) data[i] = (Math.random() * 2 - 1) * 0.45;
+
+        const noise = this.ctx.createBufferSource();
+        noise.buffer = buffer;
+        const filter = this.ctx.createBiquadFilter();
+        filter.type = 'highpass';
+        filter.frequency.setValueAtTime(1200, time);
+
+        const gain = this.ctx.createGain();
+        gain.gain.setValueAtTime(0.12, time);
+        gain.gain.exponentialRampToValueAtTime(0.001, time + 0.08);
+
+        noise.connect(filter);
+        filter.connect(gain);
+        gain.connect(this.masterFilter);
+        noise.start(time);
+        noise.stop(time + 0.08);
+      }
+
+      playShaker(time) {
+        if (!this.ctx) return;
+        const bufferSize = Math.floor(this.ctx.sampleRate * 0.03);
+        const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+        const data = buffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) data[i] = (Math.random() * 2 - 1) * 0.25;
+
+        const noise = this.ctx.createBufferSource();
+        noise.buffer = buffer;
+        const filter = this.ctx.createBiquadFilter();
+        filter.type = 'bandpass';
+        filter.frequency.setValueAtTime(7000, time);
+
+        const gain = this.ctx.createGain();
+        gain.gain.setValueAtTime(0.045, time);
+        gain.gain.exponentialRampToValueAtTime(0.001, time + 0.03);
+
+        noise.connect(filter);
+        filter.connect(gain);
+        gain.connect(this.masterFilter);
+        noise.start(time);
+        noise.stop(time + 0.03);
+      }
+
+      /**
+       * setStage - 随着游戏生命减少设置五重崩坏音效
+       * @param {number} stage 1 至 5
+       */
+      setStage(stage) {
+        this.stage = Math.max(1, Math.min(5, stage));
+        this.isTapeStopping = false;
+
+        if (this.stage === 1) {
+          // 初始日常：原调原速 1.0x，明亮清澈，无晃动
+          this.targetRate = 1.0;
+          this.wobbleAmp = 0;
+          if (this.masterFilter && this.ctx) {
+            this.masterFilter.frequency.setValueAtTime(18000, this.ctx.currentTime);
+          }
+        } else if (this.stage === 2) {
+          // 丢失 1 命 ("没关系没关系...")：轻微降调至 0.93x，带有受潮磁带微量跑调 (Tape Warble)
+          this.targetRate = 0.93;
+          this.wobbleAmp = 0.016;
+          if (this.masterFilter && this.ctx) {
+            this.masterFilter.frequency.setValueAtTime(9500, this.ctx.currentTime);
+          }
+        } else if (this.stage === 3) {
+          // 丢失 2 命 ("看着我就好了")：低沉拖沓降调至 0.84x，偶发瞬间升调至 1.25x 抽搐
+          this.targetRate = 0.84;
+          this.wobbleAmp = 0.04;
+          if (this.masterFilter && this.ctx) {
+            this.masterFilter.frequency.setValueAtTime(6200, this.ctx.currentTime);
+          }
+        } else if (this.stage === 4) {
+          // 丢失 3 命 ("script.rpy: Line 404")：深度降调至 0.72x，大幅度撕裂升降调交替与声卡丢帧
+          this.targetRate = 0.72;
+          this.wobbleAmp = 0.075;
+          if (this.masterFilter && this.ctx) {
+            this.masterFilter.frequency.setValueAtTime(3800, this.ctx.currentTime);
+          }
+        } else if (this.stage === 5) {
+          // 终极毁灭 ("Just Monika")：极端阴沉扭曲的恶魔慢速 0.58x，伴随尖锐高频 1.5x 代码尖啸与卡死
+          this.targetRate = 0.58;
+          this.wobbleAmp = 0.11;
+          if (this.masterFilter && this.ctx) {
+            this.masterFilter.frequency.setValueAtTime(2400, this.ctx.currentTime);
+          }
+        }
+      }
+
+      update() {
+        if (!this.ctx || !this.isPlaying) return;
+
+        // 平滑渐变至目标基准速度
+        this.currentRate += (this.targetRate - this.currentRate) * 0.06;
+
+        // 磁带失真走调 LFO
+        this.wobblePhase += 0.045;
+        const wobble = Math.sin(this.wobblePhase) * this.wobbleAmp;
+        let computedRate = this.currentRate + wobble;
+
+        // 阶段 3～5 特有的突发升调狂暴抽搐脉冲 (Pitch Seizure Glitch)
+        if (this.stage >= 3 && !this.isTapeStopping) {
+          this.glitchPulseTimer--;
+          if (this.glitchPulseTimer <= 0) {
+            const nextInterval = this.stage === 3 ? 240 : (this.stage === 4 ? 150 : 90);
+            this.glitchPulseTimer = Math.floor(nextInterval + Math.random() * 80);
+            this.isGlitchSpikeActive = true;
+            this.glitchDuration = this.stage === 3 ? 18 : (this.stage === 4 ? 26 : 35);
+          }
+
+          if (this.isGlitchSpikeActive) {
+            this.glitchDuration--;
+            const spikeMult = this.stage === 3 ? 1.25 : (this.stage === 4 ? 1.42 : 1.55);
+            computedRate = (this.currentRate * spikeMult) + (Math.random() - 0.5) * 0.1;
+            if (this.glitchDuration <= 0) {
+              this.isGlitchSpikeActive = false;
+            }
+          }
+        }
+
+        // 阶段 4～5 声卡丢帧微静音微卡顿 (Audio Buffer Dropout)
+        if (this.stage >= 4 && !this.isTapeStopping) {
+          this.stutterTimer--;
+          if (this.stutterTimer <= 0) {
+            this.stutterTimer = Math.floor(Math.random() * 110 + 70);
+            this.isStuttering = true;
+            this.stutterFrames = Math.floor(Math.random() * 4 + 2);
+          }
+
+          if (this.isStuttering) {
+            this.stutterFrames--;
+            if (this.stutterFrames <= 0) {
+              this.isStuttering = false;
+            }
+          }
+        }
+
+        this.currentRate = Math.max(0.12, Math.min(2.1, computedRate));
+
+        // 如果载入了桌面原曲 MP3，将计算出的动态音高比率直接同步到音频实体（实现物理变调）
+        if (this.hasCustomFile && this.audioEl && !this.audioEl.paused) {
+          try {
+            this.audioEl.playbackRate = Math.max(0.1, Math.min(2.5, this.currentRate));
+          } catch (e) {}
+        }
+      }
+
+      triggerTapeStop() {
+        this.isTapeStopping = true;
+        this.targetRate = 0.05;
+        let slide = 1.0;
+        const interval = setInterval(() => {
+          slide *= 0.85;
+          if (slide <= 0.06) {
+            clearInterval(interval);
+            this.pause();
+          } else {
+            this.currentRate = Math.max(0.08, slide);
+            if (this.hasCustomFile && this.audioEl) {
+              try { this.audioEl.playbackRate = this.currentRate; } catch (e) {}
+            }
+          }
+        }, 50);
+      }
+
+      restoreNormal() {
+        this.setStage(1);
+        if (this.hasCustomFile && this.audioEl) {
+          try {
+            this.audioEl.currentTime = 0;
+            this.audioEl.playbackRate = 1.0;
+          } catch (e) {}
+        }
+        if (!this.muted) {
+          this.play();
+        }
+      }
+    }
+
+    /**
+     * DDLCSoundEngine - 纯 Web Audio 合成日系八音盒、金属刀鸣、蛋糕欢鸣与故障噪波
+     */
+    class DDLCSoundEngine {
+      constructor() {
+        this.ctx = null;
+        this.muted = false;
+        this.pentatonic = [523.25, 587.33, 659.25, 783.99, 880.00, 1046.50, 1174.66, 1318.51, 1567.98, 1760.00];
+        this.activeCorruptionNodes = [];
+        this.corruptionIntervals = [];
+        this.corruptionGain = null;
+      }
+
+      init() {
+        if (!this.ctx) {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          if (AudioContext) {
+            this.ctx = new AudioContext();
+          }
+        }
+        if (this.ctx && this.ctx.state === 'suspended') {
+          this.ctx.resume();
+        }
+      }
+
+      createDistortionCurve(amount = 75) {
+        const n_samples = 44100;
+        const curve = new Float32Array(n_samples);
+        const deg = Math.PI / 180;
+        for (let i = 0; i < n_samples; ++i) {
+          const x = (i * 2) / n_samples - 1;
+          curve[i] = ((3 + amount) * x * 20 * deg) / (Math.PI + amount * Math.abs(x));
+        }
+        return curve;
+      }
+
+      stopCorruptionSound() {
+        if (this.corruptionIntervals && this.corruptionIntervals.length > 0) {
+          this.corruptionIntervals.forEach(id => clearInterval(id));
+          this.corruptionIntervals = [];
+        }
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+
+        const gainToFade = this.corruptionGain;
+        this.corruptionGain = null;
+
+        const nodesToStop = this.activeCorruptionNodes ? [...this.activeCorruptionNodes] : [];
+        this.activeCorruptionNodes = [];
+
+        if (gainToFade) {
+          try {
+            gainToFade.gain.setValueAtTime(gainToFade.gain.value, now);
+            gainToFade.gain.linearRampToValueAtTime(0.0001, now + 0.12);
+          } catch (e) {}
+        }
+
+        setTimeout(() => {
+          nodesToStop.forEach(node => {
+            try {
+              if (node.stop) node.stop();
+              if (node.disconnect) node.disconnect();
+            } catch (e) {}
+          });
+          if (gainToFade) {
+            try { gainToFade.disconnect(); } catch (e) {}
+          }
+        }, 150);
+      }
+
+      startContinuousTVSnow(masterGain, volume = 0.35, isHarsh = false) {
+        if (this.muted || !this.ctx) return;
+        const now = this.ctx.currentTime;
+        const sampleRate = this.ctx.sampleRate;
+        const bufferSize = sampleRate * 2;
+        const buffer = this.ctx.createBuffer(1, bufferSize, sampleRate);
+        const data = buffer.getChannelData(0);
+
+        for (let i = 0; i < bufferSize; i++) {
+          const pop = Math.random() < 0.015 ? (Math.random() * 2 - 1) * 0.45 : 0;
+          data[i] = ((Math.random() * 2 - 1) * 0.7 + pop);
+        }
+
+        const noise = this.ctx.createBufferSource();
+        noise.buffer = buffer;
+        noise.loop = true;
+
+        const lowpass = this.ctx.createBiquadFilter();
+        lowpass.type = 'lowpass';
+        lowpass.frequency.setValueAtTime(isHarsh ? 6800 : 4200, now);
+
+        const highpass = this.ctx.createBiquadFilter();
+        highpass.type = 'highpass';
+        highpass.frequency.setValueAtTime(140, now);
+
+        const hum = this.ctx.createOscillator();
+        hum.type = 'sine';
+        hum.frequency.setValueAtTime(50, now);
+        const humGain = this.ctx.createGain();
+        humGain.gain.setValueAtTime(volume * 0.22, now);
+        hum.connect(humGain);
+
+        const snowGain = this.ctx.createGain();
+        snowGain.gain.setValueAtTime(0.001, now);
+        snowGain.gain.linearRampToValueAtTime(volume, now + 0.15);
+
+        noise.connect(lowpass);
+        lowpass.connect(highpass);
+        highpass.connect(snowGain);
+        humGain.connect(snowGain);
+        snowGain.connect(masterGain);
+
+        noise.start(now);
+        hum.start(now);
+        this.activeCorruptionNodes.push(noise, lowpass, highpass, hum, humGain, snowGain);
+      }
+
+      triggerRadioTuningSweep(masterGain, volume = 0.28) {
+        if (this.muted || !this.ctx) return;
+        const now = this.ctx.currentTime;
+        const sampleRate = this.ctx.sampleRate;
+        const bufferSize = Math.floor(sampleRate * 0.7);
+        const buffer = this.ctx.createBuffer(1, bufferSize, sampleRate);
+        const data = buffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) {
+          data[i] = (Math.random() * 2 - 1) * 0.8;
+        }
+
+        const sweepNoise = this.ctx.createBufferSource();
+        sweepNoise.buffer = buffer;
+
+        const filter = this.ctx.createBiquadFilter();
+        filter.type = 'bandpass';
+        filter.Q.setValueAtTime(4.5, now);
+        filter.frequency.setValueAtTime(2400, now);
+        filter.frequency.exponentialRampToValueAtTime(420, now + 0.65);
+
+        const whistle = this.ctx.createOscillator();
+        whistle.type = 'sine';
+        whistle.frequency.setValueAtTime(1400, now);
+        whistle.frequency.exponentialRampToValueAtTime(180, now + 0.45);
+
+        const whistleGain = this.ctx.createGain();
+        whistleGain.gain.setValueAtTime(volume * 0.35, now);
+        whistleGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.45);
+
+        const sweepGain = this.ctx.createGain();
+        sweepGain.gain.setValueAtTime(volume, now);
+        sweepGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.68);
+
+        sweepNoise.connect(filter);
+        filter.connect(sweepGain);
+        whistle.connect(whistleGain);
+        whistleGain.connect(sweepGain);
+        sweepGain.connect(masterGain);
+
+        sweepNoise.start(now);
+        whistle.start(now);
+        sweepNoise.stop(now + 0.7);
+        whistle.stop(now + 0.45);
+      }
+
+      startContinuousComputerFreeze(masterGain, freq = 110, volume = 0.32) {
+        if (this.muted || !this.ctx) return;
+        const now = this.ctx.currentTime;
+
+        const osc = this.ctx.createOscillator();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(freq, now);
+
+        const lowpass = this.ctx.createBiquadFilter();
+        lowpass.type = 'lowpass';
+        lowpass.frequency.setValueAtTime(850, now);
+
+        const gain = this.ctx.createGain();
+        gain.gain.setValueAtTime(0.001, now);
+        gain.gain.linearRampToValueAtTime(volume, now + 0.08);
+
+        osc.connect(lowpass);
+        lowpass.connect(gain);
+        gain.connect(masterGain);
+
+        osc.start(now);
+        this.activeCorruptionNodes.push(osc, lowpass, gain);
+      }
+
+      startContinuousCRTWhine(masterGain, volume = 0.09) {
+        if (this.muted || !this.ctx) return;
+        const now = this.ctx.currentTime;
+
+        const osc = this.ctx.createOscillator();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(15625, now);
+
+        const gain = this.ctx.createGain();
+        gain.gain.setValueAtTime(0.001, now);
+        gain.gain.linearRampToValueAtTime(volume, now + 0.4);
+
+        osc.connect(gain);
+        gain.connect(masterGain);
+
+        osc.start(now);
+        this.activeCorruptionNodes.push(osc, gain);
+      }
+
+      startContinuousDeadCarrier(masterGain, freq = 220, volume = 0.12) {
+        if (this.muted || !this.ctx) return;
+        const now = this.ctx.currentTime;
+
+        const osc = this.ctx.createOscillator();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, now);
+
+        const gain = this.ctx.createGain();
+        gain.gain.setValueAtTime(0.001, now);
+        gain.gain.linearRampToValueAtTime(volume, now + 0.2);
+
+        osc.connect(gain);
+        gain.connect(masterGain);
+
+        osc.start(now);
+        this.activeCorruptionNodes.push(osc, gain);
+      }
+
+      startContinuousVoidDrone(masterGain, baseFreq = 42, volume = 0.22) {
+        if (this.muted || !this.ctx) return;
+        const now = this.ctx.currentTime;
+
+        const drone1 = this.ctx.createOscillator();
+        drone1.type = 'sine';
+        drone1.frequency.setValueAtTime(baseFreq, now);
+
+        const drone2 = this.ctx.createOscillator();
+        drone2.type = 'sine';
+        drone2.frequency.setValueAtTime(baseFreq + 0.5, now);
+
+        const lowpass = this.ctx.createBiquadFilter();
+        lowpass.type = 'lowpass';
+        lowpass.frequency.setValueAtTime(baseFreq * 2.2, now);
+
+        const gain = this.ctx.createGain();
+        gain.gain.setValueAtTime(0.001, now);
+        gain.gain.linearRampToValueAtTime(volume, now + 0.3);
+
+        drone1.connect(lowpass);
+        drone2.connect(lowpass);
+        lowpass.connect(gain);
+        gain.connect(masterGain);
+
+        drone1.start(now);
+        drone2.start(now);
+        this.activeCorruptionNodes.push(drone1, drone2, lowpass, gain);
+      }
+
+      playEerieAmbientNote(freq, duration = 1.4, volume = 0.16) {
+        if (this.muted || !this.ctx) return;
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, now);
+        gain.gain.setValueAtTime(volume, now);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + duration);
+      }
+
+      startContinuousFailureStageSound(stage) {
+        this.stopCorruptionSound();
+        if (this.muted) return;
+        this.init();
+        if (!this.ctx) return;
+        if (this.ctx.state === 'suspended') {
+          this.ctx.resume();
+        }
+
+        const now = this.ctx.currentTime;
+        const master = this.ctx.createGain();
+        master.gain.setValueAtTime(0.001, now);
+        master.gain.linearRampToValueAtTime(0.95, now + 0.1);
+        master.connect(this.ctx.destination);
+        this.corruptionGain = master;
+
+        if (stage === 1) {
+          this.playMusicBoxNote(587.33, 0.45, 0.22);
+          setTimeout(() => this.playMusicBoxNote(523.25, 0.65, 0.2), 150);
+        } else if (stage === 2) {
+          this.startContinuousTVSnow(master, 0.24, false);
+          this.startContinuousCRTWhine(master, 0.05);
+          this.startContinuousVoidDrone(master, 45, 0.16);
+
+          const id = setInterval(() => {
+            if (this.muted || !this.ctx || this.corruptionGain !== master) return;
+            this.playEerieAmbientNote(466.16, 2.2, 0.12);
+          }, 3800);
+          this.corruptionIntervals.push(id);
+        } else if (stage === 3) {
+          this.triggerRadioTuningSweep(master, 0.35);
+          this.startContinuousTVSnow(master, 0.38, false);
+          this.startContinuousComputerFreeze(master, 138, 0.18);
+          this.startContinuousCRTWhine(master, 0.08);
+
+          const id = setInterval(() => {
+            if (this.muted || !this.ctx || this.corruptionGain !== master) return;
+            this.playEerieAmbientNote(370.00, 2.8, 0.1);
+          }, 4500);
+          this.corruptionIntervals.push(id);
+        } else if (stage === 4) {
+          this.startContinuousTVSnow(master, 0.46, true);
+          this.startContinuousComputerFreeze(master, 88, 0.34);
+          this.startContinuousDeadCarrier(master, 220, 0.15);
+          this.startContinuousCRTWhine(master, 0.11);
+          this.startContinuousVoidDrone(master, 38, 0.26);
+        } else if (stage === 5) {
+          this.startContinuousTVSnow(master, 0.58, true);
+          this.startContinuousComputerFreeze(master, 110, 0.42);
+          this.startContinuousDeadCarrier(master, 440, 0.16);
+          this.startContinuousCRTWhine(master, 0.14);
+          this.startContinuousVoidDrone(master, 32, 0.35);
+        }
+      }
+
+      playFatalCrashSound() {
+        if (this.muted || !this.ctx) return;
+        this.stopCorruptionSound();
+
+        const now = this.ctx.currentTime;
+
+        const subOsc = this.ctx.createOscillator();
+        const subGain = this.ctx.createGain();
+        const subShaper = this.ctx.createWaveShaper();
+        subShaper.curve = this.createDistortionCurve(70);
+
+        subOsc.type = 'sawtooth';
+        subOsc.frequency.setValueAtTime(140, now);
+        subOsc.frequency.exponentialRampToValueAtTime(18, now + 0.85);
+
+        subGain.gain.setValueAtTime(0.55, now);
+        subGain.gain.linearRampToValueAtTime(0.0001, now + 0.95);
+
+        subOsc.connect(subShaper);
+        subShaper.connect(subGain);
+        subGain.connect(this.ctx.destination);
+        subOsc.start(now);
+        subOsc.stop(now + 0.95);
+
+        const sampleRate = this.ctx.sampleRate;
+        const bufferSize = Math.floor(sampleRate * 0.95);
+        const buffer = this.ctx.createBuffer(1, bufferSize, sampleRate);
+        const data = buffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) {
+          data[i] = (Math.random() * 2 - 1) * 0.95;
+        }
+        const snow = this.ctx.createBufferSource();
+        snow.buffer = buffer;
+
+        const snowFilter = this.ctx.createBiquadFilter();
+        snowFilter.type = 'bandpass';
+        snowFilter.frequency.setValueAtTime(2600, now);
+        snowFilter.frequency.linearRampToValueAtTime(400, now + 0.92);
+
+        const snowGain = this.ctx.createGain();
+        snowGain.gain.setValueAtTime(0.65, now);
+        snowGain.gain.linearRampToValueAtTime(0.0001, now + 0.95);
+
+        snow.connect(snowFilter);
+        snowFilter.connect(snowGain);
+        snowGain.connect(this.ctx.destination);
+        snow.start(now);
+        snow.stop(now + 0.95);
+
+        const freezeOsc = this.ctx.createOscillator();
+        const freezeGain = this.ctx.createGain();
+        freezeOsc.type = 'sawtooth';
+        freezeOsc.frequency.setValueAtTime(110, now);
+
+        freezeGain.gain.setValueAtTime(0.45, now);
+        freezeGain.gain.linearRampToValueAtTime(0.0001, now + 0.95);
+
+        freezeOsc.connect(freezeGain);
+        freezeGain.connect(this.ctx.destination);
+        freezeOsc.start(now);
+        freezeOsc.stop(now + 0.95);
+      }
+
+      playMusicBoxNote(freq, duration = 0.35, volume = 0.2) {
+        if (this.muted || !this.ctx) return;
+        if (!isFinite(freq) || freq <= 0 || !isFinite(duration) || duration <= 0 || !isFinite(volume)) return;
+        const now = this.ctx.currentTime;
+
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, now);
+
+        const overtone = this.ctx.createOscillator();
+        const overtoneGain = this.ctx.createGain();
+        overtone.type = 'sine';
+        overtone.frequency.setValueAtTime(freq * 2.756, now);
+
+        gain.gain.setValueAtTime(volume, now);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+
+        overtoneGain.gain.setValueAtTime(volume * 0.32, now);
+        overtoneGain.gain.exponentialRampToValueAtTime(0.0001, now + (duration * 0.65));
+
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        overtone.connect(overtoneGain);
+        overtoneGain.connect(this.ctx.destination);
+
+        osc.start(now);
+        overtone.start(now);
+        osc.stop(now + duration);
+        overtone.stop(now + duration);
+      }
+
+      playPaddleHit(panOffset = 0) {
+        if (this.muted || !this.ctx) return;
+        const safeOffset = isFinite(panOffset) ? panOffset : 0;
+        const baseFreq = 440 + safeOffset * 65;
+        this.playMusicBoxNote(baseFreq, 0.22, 0.24);
+        this.playMusicBoxNote(baseFreq * 1.5, 0.14, 0.12);
+      }
+
+      playBrickHit(combo = 1, isHardcover = false) {
+        if (this.muted || !this.ctx) return;
+        const safeCombo = Math.max(1, Math.floor(combo) || 1);
+        const noteIndex = (safeCombo - 1) % this.pentatonic.length;
+        const freq = (this.pentatonic[noteIndex] || 523.25) * (isHardcover ? 0.75 : 1);
+        this.playMusicBoxNote(freq, 0.32, 0.25);
+      }
+
+      playWallHit() {
+        if (this.muted || !this.ctx) return;
+        this.playMusicBoxNote(880, 0.08, 0.08);
+      }
+
+      playPowerup(type) {
+        if (this.muted || !this.ctx) return;
+        const now = this.ctx.currentTime;
+
+        if (type === 'monika_heart') {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(120, now);
+          osc.frequency.exponentialRampToValueAtTime(50, now + 0.25);
+          gain.gain.setValueAtTime(0.4, now);
+          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.25);
+
+          setTimeout(() => {
+            this.playMusicBoxNote(1046.50, 0.6, 0.3);
+            this.playMusicBoxNote(1318.51, 0.5, 0.25);
+          }, 110);
+        } else if (type === 'yuri_knife') {
+          const osc1 = this.ctx.createOscillator();
+          const osc2 = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc1.type = 'sawtooth';
+          osc2.type = 'triangle';
+          osc1.frequency.setValueAtTime(1580, now);
+          osc1.frequency.exponentialRampToValueAtTime(310, now + 0.38);
+          osc2.frequency.setValueAtTime(940, now);
+          osc2.frequency.exponentialRampToValueAtTime(210, now + 0.38);
+
+          gain.gain.setValueAtTime(0.28, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.38);
+
+          osc1.connect(gain);
+          osc2.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc1.start(now);
+          osc2.start(now);
+          osc1.stop(now + 0.38);
+          osc2.stop(now + 0.38);
+        } else if (type === 'natsuki_cupcake') {
+          [659.25, 880.00, 1174.66, 1567.98].forEach((f, i) => {
+            setTimeout(() => this.playMusicBoxNote(f, 0.22, 0.2), i * 55);
+          });
+        } else if (type === 'sayori_bow') {
+          const arpeggio = [523.25, 659.25, 783.99, 1046.50, 1318.51, 1567.98];
+          arpeggio.forEach((f, i) => {
+            setTimeout(() => this.playMusicBoxNote(f, 0.28, 0.18), i * 45);
+          });
+        }
+      }
+
+      playVictory() {
+        if (this.muted || !this.ctx) return;
+        const melody = [523.25, 659.25, 783.99, 1046.50, 1318.51, 1567.98];
+        melody.forEach((freq, idx) => {
+          setTimeout(() => this.playMusicBoxNote(freq, 0.65, 0.26), idx * 105);
+        });
+      }
+    }
+
+    /**
+     * InputManager - 统一响应键盘、鼠标与触控
+     */
+    class InputManager {
+      constructor(canvas) {
+        this.canvas = canvas;
+        this.keys = { left: false, right: false, space: false };
+        this.mousePos = { x: null, y: null };
+        this.isMouseActive = false;
+        this.isFrozen = false;
+        this.actionCallback = null;
+
+        this.setupKeyboard();
+        this.setupPointer();
+      }
+
+      setupKeyboard() {
+        window.addEventListener('keydown', (e) => {
+          if (['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.code)) {
+            e.preventDefault();
+          }
+          if (e.code === 'Escape') {
+            e.preventDefault();
+            if (this.actionCallback) this.actionCallback('toggle_pause');
+            return;
+          }
+          if (this.isFrozen) return;
+
+          if (e.code === 'ArrowLeft' || e.code === 'KeyA') this.keys.left = true;
+          if (e.code === 'ArrowRight' || e.code === 'KeyD') this.keys.right = true;
+          if (e.code === 'Space') {
+            this.keys.space = true;
+            if (this.actionCallback) this.actionCallback('launch_or_resume');
+          }
+          if (e.code === 'KeyP') {
+            if (this.actionCallback) this.actionCallback('toggle_pause');
+          }
+          if (e.code === 'KeyS') {
+            if (this.actionCallback) this.actionCallback('open_settings');
+          }
+        });
+
+        window.addEventListener('keyup', (e) => {
+          if (e.code === 'ArrowLeft' || e.code === 'KeyA') this.keys.left = false;
+          if (e.code === 'ArrowRight' || e.code === 'KeyD') this.keys.right = false;
+          if (e.code === 'Space') this.keys.space = false;
+        });
+      }
+
+      setupPointer() {
+        const updateCoord = (clientX) => {
+          if (this.isFrozen) return;
+          const rect = this.canvas.getBoundingClientRect();
+          const scaleX = this.canvas.width / rect.width;
+          this.mousePos.x = (clientX - rect.left) * scaleX;
+          this.isMouseActive = true;
+        };
+
+        this.canvas.addEventListener('mousemove', (e) => updateCoord(e.clientX));
+        this.canvas.addEventListener('mouseleave', () => { this.isMouseActive = false; });
+
+        this.canvas.addEventListener('touchmove', (e) => {
+          if (e.touches.length > 0) updateCoord(e.touches[0].clientX);
+        }, { passive: false });
+
+        this.canvas.addEventListener('pointerdown', (e) => {
+          if (this.isFrozen) return;
+          updateCoord(e.clientX);
+          if (this.actionCallback) this.actionCallback('canvas_click');
+        });
+      }
+    }
+
+    /**
+     * DDLCParticleSystem - 爱心粒子、冲击光波 (Shockwave)、碎屑与文学部诗词浮空弹幕
+     */
+    class DDLCParticleSystem {
+      constructor() {
+        this.particles = [];
+        this.floatingTexts = [];
+        this.shockwaves = [];
+        this.poemWords = [
+          'Happiness', 'Cupcake', 'Poem', 'Sunshine', 
+          'Melody', 'Ribbon', 'Romance', 'Doki-Doki!', 
+          'Vanilla', 'Parfait', 'Sweet', 'Eternity', 
+          'Heartbeat', 'Literature', 'Joy', 'Twinkle',
+          'Tea Time', 'Pages', 'Passion', 'Secret', 'Anthology'
+        ];
+      }
+
+      addShockwave(x, y, color = '#ff7aa2', maxRadius = 38) {
+        this.shockwaves.push({
+          x,
+          y,
+          radius: 4,
+          maxRadius,
+          color,
+          alpha: 1,
+          width: 3.5
+        });
+      }
+
+      createPoemBurst(x, y, color, isSpecial = false) {
+        const count = isSpecial ? 24 : 14;
+        for (let i = 0; i < count; i++) {
+          const angle = Math.random() * Math.PI * 2;
+          const speed = Math.random() * 4.8 + 1.8;
+          const isHeart = Math.random() > 0.42;
+          this.particles.push({
+            x,
+            y,
+            vx: Math.cos(angle) * speed,
+            vy: Math.sin(angle) * speed,
+            rotation: Math.random() * Math.PI * 2,
+            vRot: (Math.random() - 0.5) * 0.16,
+            size: isHeart ? Math.random() * 6 + 5 : Math.random() * 4 + 3,
+            color,
+            isHeart,
+            alpha: 1,
+            life: Math.random() * 25 + 25,
+            maxLife: 50
+          });
+        }
+      }
+
+      addPoemWord(x, y, text, color, isLarge = false) {
+        this.floatingTexts.push({
+          x,
+          y,
+          text,
+          color,
+          alpha: 1,
+          vy: -1.4,
+          isLarge,
+          life: 48
+        });
+      }
+
+      triggerRandomPoemWord(x, y, color) {
+        const word = this.poemWords[Math.floor(Math.random() * this.poemWords.length)];
+        this.addPoemWord(x, y - 8, word, color, true);
+      }
+
+      update() {
+        for (let i = this.particles.length - 1; i >= 0; i--) {
+          const p = this.particles[i];
+          p.x += p.vx;
+          p.y += p.vy;
+          p.vy += 0.08;
+          p.vx *= 0.96;
+          p.rotation += p.vRot;
+          p.life--;
+          p.alpha = Math.max(0, p.life / p.maxLife);
+          if (p.life <= 0) this.particles.splice(i, 1);
+        }
+
+        for (let i = this.floatingTexts.length - 1; i >= 0; i--) {
+          const ft = this.floatingTexts[i];
+          ft.y += ft.vy;
+          ft.life--;
+          ft.alpha = Math.max(0, ft.life / 48);
+          if (ft.life <= 0) this.floatingTexts.splice(i, 1);
+        }
+
+        for (let i = this.shockwaves.length - 1; i >= 0; i--) {
+          const sw = this.shockwaves[i];
+          sw.radius += (sw.maxRadius - sw.radius) * 0.22 + 1.2;
+          sw.alpha = Math.max(0, 1 - (sw.radius / sw.maxRadius));
+          sw.width = Math.max(0.5, sw.width * 0.94);
+          if (sw.radius >= sw.maxRadius || sw.alpha <= 0.05) {
+            this.shockwaves.splice(i, 1);
+          }
+        }
+      }
+
+      draw(ctx) {
+        ctx.save();
+        for (const sw of this.shockwaves) {
+          ctx.save();
+          ctx.beginPath();
+          ctx.arc(sw.x, sw.y, sw.radius, 0, Math.PI * 2);
+          ctx.strokeStyle = sw.color;
+          ctx.globalAlpha = sw.alpha * 0.85;
+          ctx.lineWidth = sw.width;
+          ctx.stroke();
+          ctx.restore();
+        }
+
+        for (const p of this.particles) {
+          ctx.save();
+          ctx.globalAlpha = p.alpha;
+          ctx.translate(p.x, p.y);
+          ctx.rotate(p.rotation);
+
+          if (p.isHeart) {
+            ctx.fillStyle = p.color;
+            ctx.beginPath();
+            const s = p.size;
+            ctx.moveTo(0, 0);
+            ctx.bezierCurveTo(-s / 2, -s / 2, -s, s / 3, 0, s);
+            ctx.bezierCurveTo(s, s / 3, s / 2, -s / 2, 0, 0);
+            ctx.fill();
+          } else {
+            ctx.fillStyle = p.color;
+            ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
+          }
+          ctx.restore();
+        }
+
+        for (const ft of this.floatingTexts) {
+          ctx.save();
+          ctx.globalAlpha = ft.alpha;
+          ctx.font = ft.isLarge 
+            ? 'bold 17px "M PLUS Rounded 1c", cursive' 
+            : 'bold 14px "Quicksand", sans-serif';
+          ctx.textAlign = 'center';
+          ctx.lineWidth = 3;
+          ctx.strokeStyle = '#ffffff';
+          ctx.strokeText(ft.text, ft.x, ft.y);
+          ctx.fillStyle = ft.color;
+          ctx.fillText(ft.text, ft.x, ft.y);
+          ctx.restore();
+        }
+        ctx.restore();
+      }
+
+      clear() {
+        this.particles = [];
+        this.floatingTexts = [];
+        this.shockwaves = [];
+      }
+    }
+
+    /**
+     * DDLCDropItem - 四位女主角专属标志物奖励
+     */
+    class DDLCDropItem {
+      constructor(x, y, type) {
+        this.x = x;
+        this.y = y;
+        this.type = type;
+        this.width = 30;
+        this.height = 30;
+        this.vy = 2.1;
+        this.time = Math.random() * 100;
+        this.collected = false;
+      }
+
+      update() {
+        this.y += this.vy;
+        this.time += 0.08;
+        this.sway = Math.sin(this.time) * 1.3;
+      }
+
+      draw(ctx) {
+        ctx.save();
+        ctx.translate(this.x + this.sway, this.y);
+
+        ctx.beginPath();
+        ctx.arc(0, 0, 16.5, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+        ctx.shadowBlur = 9;
+        ctx.shadowColor = this.getGlowColor();
+        ctx.fill();
+        ctx.strokeStyle = this.getGlowColor();
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+
+        if (this.type === 'monika_heart') {
+          ctx.save();
+          const beat = 1 + Math.sin(this.time * 6) * 0.12;
+          ctx.scale(beat, beat);
+
+          const grad = ctx.createLinearGradient(-10, -10, 10, 10);
+          grad.addColorStop(0, '#2ecc71');
+          grad.addColorStop(0.55, '#ff7aa2');
+          grad.addColorStop(1, '#e0527f');
+          ctx.fillStyle = grad;
+
+          ctx.beginPath();
+          const s = 11;
+          ctx.moveTo(0, -s / 2);
+          ctx.bezierCurveTo(-s / 2, -s, -s, -s / 3, 0, s / 2);
+          ctx.bezierCurveTo(s, -s / 3, s / 2, -s, 0, -s / 2);
+          ctx.fill();
+
+          ctx.fillStyle = '#ffffff';
+          ctx.strokeStyle = '#2ecc71';
+          ctx.lineWidth = 0.8;
+          ctx.beginPath();
+          ctx.ellipse(-4, -1, 4, 2.2, -Math.PI / 4, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+          ctx.beginPath();
+          ctx.ellipse(4, -1, 4, 2.2, Math.PI / 4, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+          ctx.beginPath();
+          ctx.arc(0, -1, 2, 0, Math.PI * 2);
+          ctx.fillStyle = '#ffffff';
+          ctx.fill();
+          ctx.restore();
+        } else if (this.type === 'yuri_knife') {
+          ctx.save();
+          ctx.rotate(-0.4);
+          ctx.fillStyle = '#8b5cf6';
+          ctx.beginPath();
+          ctx.roundRect(-4, -5, 8, 17, 2);
+          ctx.fill();
+          ctx.fillStyle = '#c4b5fd';
+          ctx.fillRect(-2.5, 2, 5, 3.5);
+          ctx.fillStyle = '#e2e8f0';
+          ctx.beginPath();
+          ctx.moveTo(-3.5, -5);
+          ctx.lineTo(3.5, -5);
+          ctx.lineTo(3.5, -14);
+          ctx.lineTo(-3.5, -8.5);
+          ctx.closePath();
+          ctx.fill();
+          ctx.strokeStyle = '#ffffff';
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.moveTo(2, -5);
+          ctx.lineTo(2, -12);
+          ctx.stroke();
+          ctx.restore();
+        } else if (this.type === 'natsuki_cupcake') {
+          ctx.save();
+          ctx.translate(0, 1);
+          ctx.fillStyle = '#d97706';
+          ctx.beginPath();
+          ctx.moveTo(-7, 2);
+          ctx.lineTo(7, 2);
+          ctx.lineTo(5, 9);
+          ctx.lineTo(-5, 9);
+          ctx.closePath();
+          ctx.fill();
+          ctx.strokeStyle = '#b45309';
+          ctx.lineWidth = 0.8;
+          ctx.beginPath();
+          ctx.moveTo(-3, 2); ctx.lineTo(-2, 9);
+          ctx.moveTo(0, 2); ctx.lineTo(0, 9);
+          ctx.moveTo(3, 2); ctx.lineTo(2, 9);
+          ctx.stroke();
+
+          ctx.fillStyle = '#ff6584';
+          ctx.beginPath();
+          ctx.arc(-4, 0, 5, 0, Math.PI * 2);
+          ctx.arc(4, 0, 5, 0, Math.PI * 2);
+          ctx.arc(0, -3, 6, 0, Math.PI * 2);
+          ctx.fill();
+
+          ctx.fillStyle = '#ffffff';
+          ctx.beginPath();
+          ctx.moveTo(-6, -5); ctx.lineTo(-2, -7); ctx.lineTo(-4, -11); ctx.closePath();
+          ctx.fill();
+          ctx.beginPath();
+          ctx.moveTo(6, -5); ctx.lineTo(2, -7); ctx.lineTo(4, -11); ctx.closePath();
+          ctx.fill();
+          ctx.fillStyle = '#ff85a1';
+          ctx.beginPath();
+          ctx.moveTo(-5, -6); ctx.lineTo(-3, -7); ctx.lineTo(-4, -9.5); ctx.closePath();
+          ctx.fill();
+          ctx.beginPath();
+          ctx.moveTo(5, -6); ctx.lineTo(3, -7); ctx.lineTo(4, -9.5); ctx.closePath();
+          ctx.fill();
+          ctx.restore();
+        } else if (this.type === 'sayori_bow') {
+          ctx.save();
+          ctx.scale(0.9, 0.9);
+          ctx.fillStyle = '#ff6b81';
+          ctx.strokeStyle = '#e0527f';
+          ctx.lineWidth = 1;
+
+          ctx.beginPath();
+          ctx.moveTo(0, 0);
+          ctx.bezierCurveTo(-15, -9, -15, 9, 0, 0);
+          ctx.fill();
+          ctx.stroke();
+          ctx.beginPath();
+          ctx.moveTo(0, 0);
+          ctx.bezierCurveTo(15, -9, 15, 9, 0, 0);
+          ctx.fill();
+          ctx.stroke();
+
+          ctx.beginPath();
+          ctx.moveTo(-2, 1);
+          ctx.lineTo(-7, 10);
+          ctx.lineTo(-2, 8);
+          ctx.fill();
+
+          ctx.beginPath();
+          ctx.moveTo(2, 1);
+          ctx.lineTo(7, 10);
+          ctx.lineTo(2, 8);
+          ctx.fill();
+
+          ctx.beginPath();
+          ctx.arc(0, 0, 3.5, 0, Math.PI * 2);
+          ctx.fillStyle = '#ffeef4';
+          ctx.fill();
+          ctx.stroke();
+          ctx.restore();
+        }
+
+        ctx.restore();
+      }
+
+      getGlowColor() {
+        switch (this.type) {
+          case 'monika_heart': return '#2ecc71';
+          case 'yuri_knife': return '#9b59b6';
+          case 'natsuki_cupcake': return '#ff6584';
+          case 'sayori_bow': return '#ff6b81';
+          default: return '#ff7aa2';
+        }
+      }
+    }
+
+    class DDLCPaddle {
+      constructor(canvasWidth, canvasHeight) {
+        this.canvasWidth = canvasWidth;
+        this.canvasHeight = canvasHeight;
+        this.defaultWidth = 118;
+        this.width = this.defaultWidth;
+        this.height = 16;
+        this.baseY = canvasHeight - 40;
+        this.y = this.baseY;
+        this.x = (canvasWidth - this.width) / 2;
+        this.baseSpeed = 10.5;
+        this.speed = this.baseSpeed;
+        this.targetX = this.x;
+        this.dipY = 0;
+        this.dipVel = 0;
+      }
+
+      triggerDip(intensity = 4.8) {
+        this.dipVel = intensity;
+      }
+
+      update(input, sensitivity = 1.0) {
+        if (input.isFrozen) return;
+
+        this.speed = this.baseSpeed * sensitivity;
+        const lerpFactor = Math.min(0.85, 0.34 * Math.max(0.4, sensitivity));
+
+        if (input.keys.left) {
+          this.targetX -= this.speed;
+          input.isMouseActive = false;
+        }
+        if (input.keys.right) {
+          this.targetX += this.speed;
+          input.isMouseActive = false;
+        }
+        if (input.isMouseActive && input.mousePos.x !== null) {
+          this.targetX = input.mousePos.x - this.width / 2;
+        }
+
+        this.targetX = Math.max(10, Math.min(this.canvasWidth - this.width - 10, this.targetX));
+        this.x += (this.targetX - this.x) * lerpFactor;
+
+        this.dipY += this.dipVel;
+        this.dipVel += (0 - this.dipY) * 0.32;
+        this.dipVel *= 0.74;
+        this.y = this.baseY + this.dipY;
+      }
+
+      draw(ctx, isPierceMode = false) {
+        ctx.save();
+        const r = this.height / 2;
+
+        ctx.shadowBlur = isPierceMode ? 18 : 12;
+        ctx.shadowColor = isPierceMode ? '#c084fc' : 'rgba(255, 122, 162, 0.45)';
+
+        ctx.beginPath();
+        ctx.roundRect(this.x - 2, this.y - 2, this.width + 4, this.height + 4, r + 2);
+        ctx.fillStyle = isPierceMode ? '#f3e8ff' : '#ffffff';
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.roundRect(this.x, this.y, this.width, this.height, r);
+        const grad = ctx.createLinearGradient(this.x, this.y, this.x + this.width, this.y);
+        if (isPierceMode) {
+          grad.addColorStop(0, '#9333ea');
+          grad.addColorStop(0.5, '#e9d5ff');
+          grad.addColorStop(1, '#9333ea');
+        } else {
+          grad.addColorStop(0, '#ff90b3');
+          grad.addColorStop(0.3, '#ff7aa2');
+          grad.addColorStop(0.5, '#ffd1e0');
+          grad.addColorStop(0.7, '#ff7aa2');
+          grad.addColorStop(1, '#ff90b3');
+        }
+        ctx.fillStyle = grad;
+        ctx.fill();
+
+        const cx = this.x + this.width / 2;
+        const cy = this.y + this.height / 2;
+
+        ctx.shadowBlur = 4;
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.15)';
+        ctx.fillStyle = '#ffffff';
+
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.bezierCurveTo(cx - 16, cy - 9, cx - 18, cy + 9, cx, cy);
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.bezierCurveTo(cx + 16, cy - 9, cx + 18, cy + 9, cx, cy);
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.moveTo(cx - 3, cy);
+        ctx.lineTo(cx - 8, cy + 12);
+        ctx.lineTo(cx - 2, cy + 10);
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.moveTo(cx + 3, cy);
+        ctx.lineTo(cx + 8, cy + 12);
+        ctx.lineTo(cx + 2, cy + 10);
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.arc(cx, cy, 4, 0, Math.PI * 2);
+        ctx.fillStyle = isPierceMode ? '#8b5cf6' : '#f59e0b';
+        ctx.fill();
+
+        ctx.restore();
+      }
+
+      reset() {
+        this.width = this.defaultWidth;
+        this.x = (this.canvasWidth - this.width) / 2;
+        this.targetX = this.x;
+        this.dipY = 0;
+        this.dipVel = 0;
+      }
+    }
+
+    class DDLCHeartBall {
+      constructor(canvasWidth, canvasHeight, startX, startY, vx = 0, vy = 0, speedMultiplier = 1.0) {
+        this.canvasWidth = canvasWidth;
+        this.canvasHeight = canvasHeight;
+        this.radius = 7.5;
+        this.nominalBaseSpeed = 4.3;
+        this.speedMultiplier = speedMultiplier;
+        this.speed = this.nominalBaseSpeed * this.speedMultiplier;
+        this.maxSpeed = 8.5 * this.speedMultiplier;
+        this.trail = [];
+        this.maxTrail = 10;
+
+        this.scaleX = 1;
+        this.scaleY = 1;
+        this.squashFactor = 1;
+
+        this.x = startX;
+        this.y = startY;
+        this.vx = vx;
+        this.vy = vy;
+        this.stuckToPaddle = false;
+      }
+
+      updateSpeedMultiplier(newMult) {
+        if (!newMult || newMult <= 0) return;
+        const curMag = Math.hypot(this.vx, this.vy);
+        this.speedMultiplier = newMult;
+        this.speed = this.nominalBaseSpeed * this.speedMultiplier;
+        this.maxSpeed = 8.5 * this.speedMultiplier;
+
+        if (curMag > 0.001) {
+          const ratio = this.speed / curMag;
+          this.vx *= ratio;
+          this.vy *= ratio;
+        }
+      }
+
+      triggerSquash(intensity = 0.55) {
+        this.squashFactor = intensity;
+      }
+
+      launch() {
+        this.stuckToPaddle = false;
+        const angle = -Math.PI / 2 + (Math.random() * 0.4 - 0.2);
+        this.vx = Math.cos(angle) * this.speed;
+        this.vy = Math.sin(angle) * this.speed;
+      }
+
+      update(paddle) {
+        if (this.stuckToPaddle) {
+          this.x = paddle.x + paddle.width / 2;
+          this.y = paddle.y - this.radius - 4;
+          this.trail = [];
+          this.scaleX = 1;
+          this.scaleY = 1;
+          return;
+        }
+
+        this.trail.unshift({ x: this.x, y: this.y });
+        if (this.trail.length > this.maxTrail) this.trail.pop();
+
+        this.x += this.vx;
+        this.y += this.vy;
+
+        this.squashFactor += (1 - this.squashFactor) * 0.28;
+        const currentSpeed = Math.hypot(this.vx, this.vy);
+        const stretchAmount = 1 + Math.min(currentSpeed / 24, 0.35);
+
+        this.scaleY = stretchAmount * this.squashFactor;
+        this.scaleX = 1 / this.scaleY;
+
+        const minVy = 1.5;
+        if (Math.abs(this.vy) < minVy) {
+          this.vy = this.vy >= 0 ? minVy : -minVy;
+          const curSpeed = Math.hypot(this.vx, this.vy);
+          this.vx = (this.vx / curSpeed) * this.speed;
+          this.vy = (this.vy / curSpeed) * this.speed;
+        }
+      }
+
+      draw(ctx, isPierceMode = false) {
+        ctx.save();
+        for (let i = 0; i < this.trail.length; i++) {
+          const pt = this.trail[i];
+          const ratio = 1 - (i / this.trail.length);
+          ctx.beginPath();
+          ctx.arc(pt.x, pt.y, this.radius * (0.3 + 0.7 * ratio), 0, Math.PI * 2);
+          ctx.fillStyle = isPierceMode 
+            ? `rgba(168, 85, 247, ${ratio * 0.45})` 
+            : `rgba(255, 122, 162, ${ratio * 0.38})`;
+          ctx.fill();
+        }
+
+        ctx.translate(this.x, this.y);
+        const moveAngle = Math.atan2(this.vy, this.vx) + Math.PI / 2;
+        ctx.rotate(moveAngle);
+        ctx.scale(this.scaleX, this.scaleY);
+
+        ctx.shadowBlur = isPierceMode ? 18 : 14;
+        ctx.shadowColor = isPierceMode ? '#c084fc' : '#ff5c8a';
+
+        ctx.beginPath();
+        ctx.arc(0, 0, this.radius, 0, Math.PI * 2);
+        const grad = ctx.createRadialGradient(0, 0, 1, 0, 0, this.radius);
+        if (isPierceMode) {
+          grad.addColorStop(0, '#ffffff');
+          grad.addColorStop(0.4, '#e9d5ff');
+          grad.addColorStop(1, '#9333ea');
+        } else {
+          grad.addColorStop(0, '#ffffff');
+          grad.addColorStop(0.4, '#ffe4ec');
+          grad.addColorStop(1, '#ff6584');
+        }
+        ctx.fillStyle = grad;
+        ctx.fill();
+
+        ctx.beginPath();
+        if (isPierceMode) {
+          ctx.moveTo(0, -this.radius * 0.75);
+          ctx.lineTo(2, this.radius * 0.5);
+          ctx.lineTo(-2, this.radius * 0.5);
+          ctx.fillStyle = '#ffffff';
+          ctx.fill();
+        } else {
+          const s = this.radius * 0.65;
+          ctx.moveTo(0, -1);
+          ctx.bezierCurveTo(-s / 2, -s / 2 - 1, -s, s / 3 - 1, 0, s - 1);
+          ctx.bezierCurveTo(s, s / 3 - 1, s / 2, -s / 2 - 1, 0, -1);
+          ctx.fillStyle = '#ffffff';
+          ctx.globalAlpha = 0.9;
+          ctx.fill();
+        }
+
+        ctx.restore();
+      }
+    }
+
+    class DDLCBrickGrid {
+      constructor(canvasWidth, canvasHeight) {
+        this.canvasWidth = canvasWidth;
+        this.canvasHeight = canvasHeight;
+        this.cols = 24;
+        this.rows = 16;
+        this.padding = 3.5;
+        this.offsetTop = 26;
+        this.offsetLeft = 20;
+        this.brickWidth = 0;
+        this.brickHeight = 13.5;
+        this.bricks = [];
+        this.totalBricks = 0;
+
+        this.levels = [
+          {
+            name: '第一关：发间蝴蝶结',
+            layout: [
+              '...SSSSSS......SSSSSS...',
+              '..SSSSSSSS....SSSSSSSS..',
+              '.SSSSSSSSSS..SSSSSSSSSS.',
+              'SSSSSSSSSSSSSSSSSSSSSSSS',
+              'SSSSSS..SSSSSSSS..SSSSSS',
+              '.SSSSS..SSSSSSSS..SSSSS.',
+              '..SSSS...SSSSSS...SSSS..',
+              '...SS.....SSSS.....SS...',
+              '.........AAAAAA.........',
+              '.........AAAAAA.........',
+              '.......SSSS..SSSS.......',
+              '......SSSSS..SSSSS......',
+              '.....SSSSSS..SSSSSS.....',
+              '....SSSSSSS..SSSSSSS....',
+              '...SSSS.SSS..SSS.SSSS...',
+              '..SSSS...SS..SS...SSSS..'
+            ]
+          },
+          {
+            name: '第二关：猫耳纸杯蛋糕',
+            layout: [
+              '..NNN..............NNN..',
+              '.NNNNN............NNNNN.',
+              'NNNNNNN..........NNNNNNN',
+              'NNNYYYN..........NYYYNNN',
+              '.NNNNNNNNNNNNNNNNNNNNNN.',
+              'NNNNNNNNNNNNNNNNNNNNNNNN',
+              'NNNNNNNNNNNNNNNNNNNNNNNN',
+              'NNNNNNNNNNNNNNNNNNNNNNNN',
+              '.NNNNNNNNNNNNNNNNNNNNNN.',
+              '..YYYYYYYYYYYYYYYYYYYY..',
+              '...YYYYYYYYYYYYYYYYYY...',
+              '...YYYYYYYYYYYYYYYYYY...',
+              '....YYYYYYYYYYYYYYYY....',
+              '....YYYYYYYYYYYYYYYY....',
+              '.....YYYYYYYYYYYYYY.....',
+              '......YYYYYYYYYYYY......'
+            ]
+          },
+          {
+            name: '第三关：典雅茶会',
+            layout: [
+              '....YY......YY......YY..',
+              '.....YY......YY......YY.',
+              '....YY......YY......YY..',
+              '.....YY......YY......YY.',
+              '..YYYYYYYYYYYYYYYYYY....',
+              '.YYYYYYYYYYYYYYYYYYYY...',
+              '.YYYYYYYYYYYYYYYYYYYYYY.',
+              '.YYYYYYYYYYYYYYYYYY..YY.',
+              '.YYYYYYYYYYYYYYYYYY...YY',
+              '..YYYYYYYYYYYYYYYYY..YY.',
+              '..YYYYYYYYYYYYYYYYYYYY..',
+              '...YYYYYYYYYYYYYYYYYY...',
+              '....YYYYYYYYYYYYYYYY....',
+              '.....YYYYYYYYYYYYYY.....',
+              '..YYYYYYYYYYYYYYYYYYYY..',
+              '.YYYYYYYYYYYYYYYYYYYYYY.'
+            ]
+          },
+          {
+            name: '第四关：文学部集',
+            layout: [
+              '...MMMMMMMM..MMMMMMMM...',
+              '..MMMMMMMMMMMMMMMMMMMM..',
+              '.MMMMMMMMMMMMMMMMMMMMMM.',
+              'MMMMMMMMMMMMMMMMMMMMMMMM',
+              'MMMAAAAAAMM..MMAAAAAAMMM',
+              'MMMAAAAAAMM..MMAAAAAAMMM',
+              'MMMAAAAAAMM..MMAAAAAAMMM',
+              'MMMAAAAAAMM..MMAAAAAAMMM',
+              'MMMMMMMMMMM..MMMMMMMMMMM',
+              'MMMAAAAAAMM..MMAAAAAAMMM',
+              'MMMAAAAAAMM..MMAAAAAAMMM',
+              'MMMAAAAAAMM..MMAAAAAAMMM',
+              'MMMMMMMMMMM..MMMMMMMMMMM',
+              '.MMMMMMMMMM..MMMMMMMMMM.',
+              '..MMMMMMMMM..MMMMMMMMM..',
+              '...MMMMMMM....MMMMMMM...'
+            ]
+          },
+          {
+            name: '第五关：永恒心跳誓约',
+            layout: [
+              '..HHHHHH........HHHHHH..',
+              '.HHHHHHHH......HHHHHHHH.',
+              'HHHHHHHHHH....HHHHHHHHHH',
+              'HHHHHHHHHHHH..HHHHHHHHHH',
+              'HHHHHHHHHHHHHHHHHHHHHHHH',
+              'HHHHHHHHHHHHHHHHHHHHHHHH',
+              'HHHHHH..MMMMMM..HHHHHHHH',
+              '.HHHHH.MMMMMMMM.HHHHHHH.',
+              '.HHHHH.MMMMMMMM.HHHHHHH.',
+              '..HHHH..MMMMMM..HHHHHH..',
+              '...HHHH..MMMM..HHHHHH...',
+              '....HHHH..MM..HHHHHH....',
+              '.....HHHHHHHHHHHHHH.....',
+              '......HHHHHHHHHHHH......',
+              '........HHHHHHHH........',
+              '..........HHHH..........'
+            ]
+          }
+        ];
+
+        this.themeDefinitions = {
+          'S': { color: '#0284c7', light: '#38bdf8', points: 30, isHardcover: false, maxHp: 1 },
+          'N': { color: '#e11d48', light: '#fb7185', points: 35, isHardcover: false, maxHp: 1 },
+          'Y': { color: '#7c3aed', light: '#a78bfa', points: 55, isHardcover: true, maxHp: 2 },
+          'M': { color: '#059669', light: '#34d399', points: 60, isHardcover: true, maxHp: 2 },
+          'A': { color: '#b45309', light: '#fbbf24', points: 65, isHardcover: true, maxHp: 2 },
+          'H': { color: '#e11d48', light: '#ff7aa2', points: 75, isHardcover: true, maxHp: 2 }
+        };
+
+        this.initGrid(0);
+      }
+
+      initGrid(levelIndex = 0) {
+        const lvl = this.levels[levelIndex % this.levels.length];
+        const layout = lvl.layout;
+        this.rows = layout.length;
+        this.cols = Math.max(...layout.map(row => row.length));
+
+        const availableWidth = this.canvasWidth - this.offsetLeft * 2;
+        this.brickWidth = (availableWidth - (this.cols - 1) * this.padding) / this.cols;
+
+        this.bricks = [];
+        this.totalBricks = 0;
+
+        for (let r = 0; r < this.rows; r++) {
+          this.bricks[r] = [];
+          const rowStr = layout[r];
+          for (let c = 0; c < this.cols; c++) {
+            const char = rowStr[c] || '.';
+            if (char === '.' || !this.themeDefinitions[char]) {
+              this.bricks[r][c] = { alive: false };
+              continue;
+            }
+
+            const def = this.themeDefinitions[char];
+            const bx = this.offsetLeft + c * (this.brickWidth + this.padding);
+            const by = this.offsetTop + r * (this.brickHeight + this.padding);
+
+            this.bricks[r][c] = {
+              x: bx,
+              y: by,
+              width: this.brickWidth,
+              height: this.brickHeight,
+              alive: true,
+              hp: def.maxHp,
+              maxHp: def.maxHp,
+              color: def.color,
+              lightColor: def.light,
+              points: def.points,
+              isHardcover: def.isHardcover
+            };
+            this.totalBricks++;
+          }
+        }
+      }
+
+      draw(ctx) {
+        ctx.save();
+        for (let r = 0; r < this.rows; r++) {
+          for (let c = 0; c < this.cols; c++) {
+            const b = this.bricks[r][c];
+            if (!b || !b.alive) continue;
+
+            ctx.beginPath();
+            ctx.roundRect(b.x, b.y, b.width, b.height, 3);
+            ctx.fillStyle = b.color;
+            ctx.fill();
+
+            if (b.isHardcover) {
+              ctx.strokeStyle = '#fef08a';
+              ctx.lineWidth = 1;
+              ctx.stroke();
+
+              ctx.fillStyle = '#fde047';
+              ctx.fillRect(b.x + 2, b.y + 2, 2, b.height - 4);
+            } else {
+              ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+              ctx.fillRect(b.x + 2, b.y + 2, 1.5, b.height - 4);
+            }
+
+            ctx.beginPath();
+            ctx.roundRect(b.x + 1.5, b.y + 1, b.width - 3, (b.height / 2) - 1, [1.5, 1.5, 0, 0]);
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.28)';
+            ctx.fill();
+
+            if (b.isHardcover && b.hp === 1) {
+              ctx.save();
+              ctx.strokeStyle = 'rgba(255, 255, 255, 0.85)';
+              ctx.lineWidth = 1.2;
+              ctx.beginPath();
+              ctx.moveTo(b.x + b.width * 0.35, b.y + 1);
+              ctx.lineTo(b.x + b.width * 0.5, b.y + b.height * 0.55);
+              ctx.lineTo(b.x + b.width * 0.44, b.y + b.height * 0.8);
+              ctx.lineTo(b.x + b.width * 0.65, b.y + b.height - 1);
+              ctx.stroke();
+              ctx.restore();
+            }
+          }
+        }
+        ctx.restore();
+      }
+    }
+
+    /**
+     * DDLCGameController - 控制器逻辑、BGM 调度与界面交互
+     */
+    class DDLCGameController {
+      constructor() {
+        this.canvas = document.getElementById('gameCanvas');
+        this.ctx = this.canvas.getContext('2d');
+        this.vWidth = 880;
+        this.vHeight = 620;
+
+        this.setupCanvasDPI();
+
+        this.bgm = new DDLCBgmController();
+        this.sound = new DDLCSoundEngine();
+        this.input = new InputManager(this.canvas);
+        this.particles = new DDLCParticleSystem();
+        this.paddle = new DDLCPaddle(this.vWidth, this.vHeight);
+
+        this.balls = [];
+        this.drops = [];
+
+        this.currentLevel = 0;
+        this.totalLevels = 5;
+        this.brickGrid = new DDLCBrickGrid(this.vWidth, this.vHeight);
+
+        this.maxReachedLevel = Math.max(1, parseInt(localStorage.getItem('ddlc_breakout_max_level') || '1', 10));
+
+        this.ambientBubbles = [];
+        this.ambientSakura = [];
+        this.ambientBokeh = [];
+        this.ambientTime = 0;
+        this.initAmbientAtmosphere();
+
+        this.state = 'TITLE';
+        this.score = 0;
+        this.highScore = parseInt(localStorage.getItem('ddlc_breakout_high_score') || '0', 10);
+        this.lives = 5;
+        this.maxLives = 5;
+        this.currentFailureStage = 1;
+        this.combo = 0;
+        this.maxComboReached = 0;
+        this.screenShake = 0;
+        this.hitstopFrames = 0;
+        this.pierceTimer = 0;
+        this.glitchTimer = 0;
+        this.isJustMonikaNextLife = false;
+
+        // 关卡画面持续崩坏系统状态 (第二次死亡后激活，下一关重置)
+        this.isLevelCorrupted = false;
+        this.inGameCorruptionStage = 0;
+        this.inGameGlitchSliceTimer = 180;
+        this.inGameGlitchActiveFrames = 0;
+        this.inGameGlitchY = 0;
+        this.inGameGlitchH = 0;
+        this.inGameGlitchShift = 0;
+        this.levelDeaths = 0;
+
+        const defaultSettings = {
+          ballSpeed: 1.0,
+          dropRate: 0.18,
+          sensitivity: 1.0,
+          displayMode: 'window'
+        };
+        try {
+          const saved = JSON.parse(localStorage.getItem('ddlc_breakout_settings') || '{}');
+          this.settings = Object.assign(defaultSettings, saved);
+        } catch (e) {
+          this.settings = defaultSettings;
+        }
+
+        this.ui = {
+          score: document.getElementById('scoreDisplay'),
+          highScore: document.getElementById('highScoreDisplay'),
+          levelDisplay: document.getElementById('levelDisplay'),
+          levelNameDisplay: document.getElementById('levelNameDisplay'),
+          ballCountDisplay: document.getElementById('ballCountDisplay'),
+          comboContainer: document.getElementById('comboContainer'),
+          combo: document.getElementById('comboDisplay'),
+          livesContainer: document.getElementById('livesContainer'),
+          launchHint: document.getElementById('launchHint'),
+          pierceIndicator: document.getElementById('pierceIndicator'),
+          pierceTimeDisplay: document.getElementById('pierceTimeDisplay'),
+          clubLogoDefault: document.getElementById('clubLogoDefault'),
+          glitchOverlay: document.getElementById('glitchOverlay'),
+          titleScreenOverlay: document.getElementById('titleScreenOverlay'),
+          btnStartGame: document.getElementById('btnStartGame'),
+          btnTitleLevelSelect: document.getElementById('btnTitleLevelSelect'),
+          btnTitleInstructions: document.getElementById('btnTitleInstructions'),
+          btnTitleSettings: document.getElementById('btnTitleSettings'),
+          levelSelectOverlay: document.getElementById('levelSelectOverlay'),
+          levelSelectList: document.getElementById('levelSelectList'),
+          btnCloseLevelSelect: document.getElementById('btnCloseLevelSelect'),
+          btnCloseLevelSelectX: document.getElementById('btnCloseLevelSelectX'),
+          pauseMenuOverlay: document.getElementById('pauseMenuOverlay'),
+          pauseLevelLabel: document.getElementById('pauseLevelLabel'),
+          btnResumeGame: document.getElementById('btnResumeGame'),
+          btnPauseInstructions: document.getElementById('btnPauseInstructions'),
+          btnPauseSettings: document.getElementById('btnPauseSettings'),
+          btnRestartCurrentLevel: document.getElementById('btnRestartCurrentLevel'),
+          btnRestartWholeGame: document.getElementById('btnRestartWholeGame'),
+          btnReturnToTitle: document.getElementById('btnReturnToTitle'),
+          instructionsOverlay: document.getElementById('instructionsOverlay'),
+          btnCloseInstructions: document.getElementById('btnCloseInstructions'),
+          btnCloseInstructionsX: document.getElementById('btnCloseInstructionsX'),
+          modalOverlay: document.getElementById('modalOverlay'),
+          modalCard: document.getElementById('modalCard'),
+          modalSpeakerTag: document.getElementById('modalSpeakerTag'),
+          modalSpeakerName: document.getElementById('modalSpeakerName'),
+          modalTitle: document.getElementById('modalTitle'),
+          modalSubtitle: document.getElementById('modalSubtitle'),
+          modalStats: document.getElementById('modalStats'),
+          finalScore: document.getElementById('finalScore'),
+          maxCombo: document.getElementById('maxCombo'),
+          modalActionBtn: document.getElementById('modalActionBtn'),
+          btnSound: document.getElementById('btnSound'),
+          btnMusic: document.getElementById('btnMusic'),
+          btnPause: document.getElementById('btnPause'),
+          btnSettings: document.getElementById('btnSettings'),
+          settingsOverlay: document.getElementById('settingsOverlay'),
+          btnCloseSettings: document.getElementById('btnCloseSettings'),
+          btnCloseSettingsX: document.getElementById('btnCloseSettingsX'),
+          btnResetSettings: document.getElementById('btnResetSettings'),
+          sliderBallSpeed: document.getElementById('sliderBallSpeed'),
+          ballSpeedVal: document.getElementById('ballSpeedVal'),
+          sliderDropRate: document.getElementById('sliderDropRate'),
+          dropRateVal: document.getElementById('dropRateVal'),
+          sliderSensitivity: document.getElementById('sliderSensitivity'),
+          sensitivityVal: document.getElementById('sensitivityVal'),
+          displayModeBadge: document.getElementById('displayModeBadge'),
+          displayModeBtns: document.querySelectorAll('.display-mode-btn'),
+          mainHeader: document.getElementById('mainHeader'),
+          gameWrapper: document.getElementById('gameWrapper'),
+          floatingQuickHud: document.getElementById('floatingQuickHud'),
+          btnFloatSettings: document.getElementById('btnFloatSettings'),
+          btnFloatPause: document.getElementById('btnFloatPause'),
+          btnExitBorderless: document.getElementById('btnExitBorderless')
+        };
+
+        this.terrorElements = {
+          blackout: document.getElementById('screenTerrorBlackout'),
+          sliceLayer: document.getElementById('screenTerrorSliceLayer'),
+          ghostContainer: document.getElementById('justMonikaGhostContainer'),
+          fatalCrash: document.getElementById('finalDeathCrashOverlay'),
+          fatalCluster: document.getElementById('fatalTextCluster')
+        };
+
+        this.initFirstBall();
+        this.bindEvents();
+        this.initSettingsUI();
+        this.applyDisplayMode(this.settings.displayMode, false);
+        this.updateHUD();
+      }
+
+      initFirstBall() {
+        this.balls = [];
+        const initialBall = new DDLCHeartBall(
+          this.vWidth,
+          this.vHeight,
+          this.paddle.x + this.paddle.width / 2,
+          this.paddle.y - 12,
+          0,
+          0,
+          this.settings.ballSpeed
+        );
+        initialBall.stuckToPaddle = true;
+        this.balls.push(initialBall);
+      }
+
+      setupCanvasDPI() {
+        const dpr = window.devicePixelRatio || 1;
+        this.canvas.width = this.vWidth * dpr;
+        this.canvas.height = this.vHeight * dpr;
+        this.ctx.setTransform(1, 0, 0, 1, 0, 0);
+        this.ctx.scale(dpr, dpr);
+      }
+
+      bindEvents() {
+        window.addEventListener('resize', () => this.setupCanvasDPI());
+
+        // 桌面音频拖拽置入支持
+        const dropHint = document.getElementById('dropMusicHint');
+        const fileInput = document.getElementById('bgmFileInput');
+        const btnLoadDesktop = document.getElementById('btnLoadDesktopMusic');
+
+        if (btnLoadDesktop && fileInput) {
+          btnLoadDesktop.addEventListener('click', () => {
+            fileInput.click();
+          });
+
+          fileInput.addEventListener('change', (e) => {
+            if (e.target.files && e.target.files[0]) {
+              this.bgm.loadFromUserFile(e.target.files[0]);
+            }
+          });
+        }
+
+        // 全屏拖拽捕获
+        window.addEventListener('dragover', (e) => {
+          e.preventDefault();
+          if (dropHint) dropHint.style.opacity = '1';
+        });
+
+        window.addEventListener('dragleave', (e) => {
+          if (e.clientX <= 0 || e.clientY <= 0 || e.clientX >= window.innerWidth || e.clientY >= window.innerHeight) {
+            if (dropHint) dropHint.style.opacity = '0';
+          }
+        });
+
+        window.addEventListener('drop', (e) => {
+          e.preventDefault();
+          if (dropHint) dropHint.style.opacity = '0';
+          if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+            const file = e.dataTransfer.files[0];
+            if (file.type.startsWith('audio/') || file.name.match(/\.(mp3|wav|ogg|m4a|flac)$/i)) {
+              this.bgm.loadFromUserFile(file);
+            }
+          }
+        });
+
+        document.addEventListener('fullscreenchange', () => {
+          if (!document.fullscreenElement && this.settings.displayMode === 'fullscreen') {
+            this.applyDisplayMode('window', true);
+          }
+        });
+
+        this.ui.btnStartGame.addEventListener('click', () => {
+          this.sound.init();
+          this.bgm.play();
+          this.startFromTitle();
+        });
+
+        this.ui.btnTitleLevelSelect.addEventListener('click', () => {
+          this.sound.init();
+          this.bgm.play();
+          this.openLevelSelect();
+        });
+
+        this.ui.btnTitleInstructions.addEventListener('click', () => {
+          this.sound.init();
+          this.bgm.play();
+          this.openInstructions();
+        });
+
+        this.ui.btnCloseLevelSelect.addEventListener('click', () => {
+          this.sound.init();
+          this.closeLevelSelect();
+        });
+
+        this.ui.btnCloseLevelSelectX.addEventListener('click', () => {
+          this.sound.init();
+          this.closeLevelSelect();
+        });
+
+        this.ui.btnTitleSettings.addEventListener('click', () => {
+          this.sound.init();
+          this.bgm.play();
+          this.openSettings();
+        });
+
+        this.ui.btnResumeGame.addEventListener('click', () => {
+          this.sound.init();
+          this.bgm.play();
+          this.resumeGame();
+        });
+
+        this.ui.btnPauseSettings.addEventListener('click', () => {
+          this.sound.init();
+          this.openSettings();
+        });
+
+        this.ui.btnPauseInstructions.addEventListener('click', () => {
+          this.sound.init();
+          this.openInstructions();
+        });
+
+        this.ui.btnCloseInstructions.addEventListener('click', () => {
+          this.sound.init();
+          this.closeInstructions();
+        });
+
+        this.ui.btnCloseInstructionsX.addEventListener('click', () => {
+          this.sound.init();
+          this.closeInstructions();
+        });
+
+        this.ui.btnReturnToTitle.addEventListener('click', () => {
+          this.sound.init();
+          this.returnToTitle();
+        });
+
+        this.ui.btnRestartCurrentLevel.addEventListener('click', () => {
+          this.sound.init();
+          this.restartCurrentLevel();
+        });
+
+        this.ui.btnRestartWholeGame.addEventListener('click', () => {
+          this.sound.init();
+          this.restartWholeGame();
+        });
+
+        this.input.actionCallback = (action) => {
+          this.sound.init();
+          this.bgm.play();
+          if (action === 'launch_or_resume') {
+            if (this.state === 'READY') this.startGame();
+            else if (this.state === 'PAUSED') this.resumeGame();
+          } else if (action === 'canvas_click') {
+            if (this.state === 'READY') this.startGame();
+          } else if (action === 'toggle_pause') {
+            this.togglePause();
+          } else if (action === 'open_settings') {
+            this.openSettings();
+          }
+        };
+
+        this.ui.btnPause.addEventListener('click', () => {
+          this.sound.init();
+          this.bgm.play();
+          this.togglePause();
+        });
+
+        this.ui.btnSound.addEventListener('click', () => {
+          this.sound.init();
+          this.sound.muted = !this.sound.muted;
+          this.ui.btnSound.textContent = this.sound.muted ? '静音' : '声音';
+          if (this.sound.muted) this.sound.stopCorruptionSound();
+        });
+
+        // 背景音乐 BGM 独立切换按钮
+        if (this.ui.btnMusic) {
+          this.ui.btnMusic.addEventListener('click', () => {
+            const isMuted = this.bgm.toggleMute();
+            this.ui.btnMusic.textContent = isMuted ? '音乐关' : '音乐';
+          });
+        }
+
+        this.ui.modalActionBtn.addEventListener('click', () => {
+          this.sound.init();
+          this.sound.stopCorruptionSound();
+
+          if (this.state === 'LEVEL_CLEAR') {
+            this.nextLevel();
+          } else if (this.state === 'LIFE_LOST') {
+            this.clearTerrorGlitches();
+            this.ui.modalOverlay.classList.add('hidden');
+            this.state = 'READY';
+            this.input.isFrozen = false;
+            this.ui.mainHeader.classList.remove('pointer-events-none');
+            this.ui.floatingQuickHud.classList.remove('pointer-events-none');
+            this.initFirstBall();
+            this.paddle.reset();
+            this.ui.launchHint.style.opacity = '1';
+            this.updateHUD();
+
+            // 第二次死亡后（当前阶段 >= 2），关卡画面进入持续崩坏状态
+            if (this.currentFailureStage >= 2) {
+              this.applyLevelCorruption(this.currentFailureStage);
+            }
+          } else if (this.state === 'VICTORY') {
+            this.restartWholeGame();
+          } else if (this.state === 'GAMEOVER') {
+            if (this.currentFailureStage === 5) {
+              this.isJustMonikaNextLife = true;
+              this.clearTerrorGlitches();
+              this.ui.modalOverlay.classList.add('hidden');
+              this.state = 'READY';
+              this.lives = 1;
+              this.initFirstBall();
+              this.paddle.reset();
+              this.ui.mainHeader.classList.remove('pointer-events-none');
+              this.ui.floatingQuickHud.classList.remove('pointer-events-none');
+              this.input.isFrozen = false;
+              this.ui.launchHint.style.opacity = '1';
+              this.updateHUD();
+            } else {
+              this.restartWholeGame();
+            }
+          }
+        });
+
+        this.ui.btnSettings.addEventListener('click', () => {
+          this.sound.init();
+          this.openSettings();
+        });
+
+        this.ui.btnCloseSettings.addEventListener('click', () => this.closeSettings());
+        this.ui.btnCloseSettingsX.addEventListener('click', () => this.closeSettings());
+
+        this.ui.btnFloatSettings.addEventListener('click', () => this.openSettings());
+        this.ui.btnFloatPause.addEventListener('click', () => this.togglePause());
+        this.ui.btnExitBorderless.addEventListener('click', () => this.applyDisplayMode('window', true));
+
+        this.ui.btnResetSettings.addEventListener('click', () => {
+          this.settings.ballSpeed = 1.0;
+          this.settings.dropRate = 0.18;
+          this.settings.sensitivity = 1.0;
+          this.settings.displayMode = 'window';
+          this.saveSettings();
+          this.initSettingsUI();
+          this.applyDisplayMode('window', true);
+          for (const b of this.balls) b.updateSpeedMultiplier(this.settings.ballSpeed);
+        });
+
+        this.ui.sliderBallSpeed.addEventListener('input', (e) => {
+          const val = parseFloat(e.target.value);
+          this.settings.ballSpeed = val;
+          this.ui.ballSpeedVal.textContent = `${val.toFixed(1)}x`;
+          for (const b of this.balls) b.updateSpeedMultiplier(val);
+          this.saveSettings();
+        });
+
+        this.ui.sliderDropRate.addEventListener('input', (e) => {
+          const val = parseFloat(e.target.value);
+          this.settings.dropRate = val;
+          this.ui.dropRateVal.textContent = `${Math.round(val * 100)}%`;
+          this.saveSettings();
+        });
+
+        this.ui.sliderSensitivity.addEventListener('input', (e) => {
+          const val = parseFloat(e.target.value);
+          this.settings.sensitivity = val;
+          this.ui.sensitivityVal.textContent = `${val.toFixed(1)}x`;
+          this.saveSettings();
+        });
+
+        this.ui.displayModeBtns.forEach((btn) => {
+          btn.addEventListener('click', () => {
+            const mode = btn.dataset.mode;
+            this.applyDisplayMode(mode, true);
+          });
+        });
+      }
+
+      startFromTitle() {
+        this.ui.titleScreenOverlay.classList.add('opacity-0', 'pointer-events-none');
+        setTimeout(() => this.ui.titleScreenOverlay.classList.add('hidden'), 500);
+        this.loadLevel(0);
+      }
+
+      loadLevel(levelIndex) {
+        this.currentLevel = levelIndex;
+        if (this.currentLevel + 1 > this.maxReachedLevel) {
+          this.maxReachedLevel = this.currentLevel + 1;
+          try {
+            localStorage.setItem('ddlc_breakout_max_level', this.maxReachedLevel.toString());
+          } catch (e) {}
+        }
+
+        this.clearLevelCorruption();
+        this.levelDeaths = 0;
+
+        this.brickGrid.initGrid(this.currentLevel);
+        this.drops = [];
+        this.pierceTimer = 0;
+        this.combo = 0;
+        this.initFirstBall();
+        this.paddle.reset();
+        this.particles.clear();
+        this.state = 'READY';
+        this.input.isFrozen = false;
+        this.ui.launchHint.style.opacity = '1';
+        this.updateHUD();
+      }
+
+      openLevelSelect() {
+        this.ui.levelSelectList.innerHTML = '';
+
+        for (let i = 0; i < this.totalLevels; i++) {
+          const lvlNumber = i + 1;
+          const lvlName = this.brickGrid.levels[i].name;
+          const isUnlocked = lvlNumber <= this.maxReachedLevel;
+
+          const btn = document.createElement('button');
+          btn.className = `w-full py-2.5 px-3 rounded-xl font-bold flex items-center justify-between transition text-xs sm:text-sm ${
+            isUnlocked
+              ? 'bg-pink-50 hover:bg-pink-100 text-pink-700 border-2 border-pink-300 active:scale-95 shadow-sm'
+              : 'bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed opacity-60'
+          }`;
+
+          btn.innerHTML = `
+            <span class="flex items-center space-x-2">
+              <span class="w-6 h-6 rounded-full flex items-center justify-center text-xs ${
+                isUnlocked ? 'bg-pink-500 text-white' : 'bg-slate-300 text-slate-500'
+              }">${lvlNumber}</span>
+              <span>${lvlName}</span>
+            </span>
+            <span class="text-[11px] font-semibold">${isUnlocked ? '可进入' : '未解锁'}</span>
+          `;
+
+          if (isUnlocked) {
+            btn.addEventListener('click', () => {
+              this.sound.init();
+              this.closeLevelSelect();
+              this.ui.titleScreenOverlay.classList.add('opacity-0', 'pointer-events-none');
+              setTimeout(() => this.ui.titleScreenOverlay.classList.add('hidden'), 500);
+              this.loadLevel(i);
+            });
+          }
+
+          this.ui.levelSelectList.appendChild(btn);
+        }
+
+        this.ui.levelSelectOverlay.classList.remove('hidden');
+      }
+
+      closeLevelSelect() {
+        this.ui.levelSelectOverlay.classList.add('hidden');
+      }
+
+      restartCurrentLevel() {
+        this.ui.pauseMenuOverlay.classList.add('hidden');
+        this.input.isFrozen = false;
+        this.clearLevelCorruption();
+        this.levelDeaths = 0;
+        this.loadLevel(this.currentLevel);
+      }
+
+      restartWholeGame() {
+        this.score = 0;
+        this.lives = 5;
+        this.currentFailureStage = 1;
+        this.maxComboReached = 0;
+        this.isJustMonikaNextLife = false;
+        this.clearLevelCorruption();
+        this.levelDeaths = 0;
+        this.clearTerrorGlitches();
+        this.bgm.restoreNormal();
+        this.ui.modalOverlay.classList.add('hidden');
+        this.ui.pauseMenuOverlay.classList.add('hidden');
+        this.ui.mainHeader.classList.remove('pointer-events-none');
+        this.ui.floatingQuickHud.classList.remove('pointer-events-none');
+        this.input.isFrozen = false;
+        this.loadLevel(0);
+      }
+
+      clearTerrorGlitches() {
+        this.sound.stopCorruptionSound();
+        document.body.classList.remove('terror-page-active-3', 'terror-page-active-4', 'terror-page-active-5');
+        this.ui.mainHeader.classList.remove('pointer-events-none');
+        this.ui.floatingQuickHud.classList.remove('pointer-events-none');
+        if (this.terrorElements.blackout) {
+          this.terrorElements.blackout.style.opacity = '0';
+        }
+        if (this.terrorElements.sliceLayer) {
+          this.terrorElements.sliceLayer.classList.add('hidden');
+          this.terrorElements.sliceLayer.innerHTML = '';
+        }
+        if (this.terrorElements.ghostContainer) {
+          this.terrorElements.ghostContainer.classList.add('hidden');
+          this.terrorElements.ghostContainer.innerHTML = '';
+        }
+      }
+
+      triggerUltimateCrashSequence() {
+        this.input.isFrozen = true;
+        this.state = 'FATAL_CRASH';
+        this.bgm.triggerTapeStop();
+        this.sound.playFatalCrashSound();
+
+        try {
+          localStorage.removeItem('ddlc_breakout_max_level');
+          localStorage.removeItem('ddlc_breakout_high_score');
+        } catch (e) {}
+
+        const overlay = this.terrorElements.fatalCrash;
+        const cluster = this.terrorElements.fatalCluster;
+        if (!overlay || !cluster) return;
+
+        overlay.classList.remove('hidden');
+        overlay.classList.add('fatal-crash-active');
+
+        cluster.innerHTML = `
+          <div class="absolute inset-0 flex flex-col items-center justify-center space-y-4">
+            <h1 class="fatal-corrupt-text text-5xl sm:text-7xl md:text-8xl text-red-600 tracking-widest font-black">
+              我 爱 你
+            </h1>
+            <h2 class="fatal-corrupt-text text-4xl sm:text-6xl text-white tracking-widest">
+              Just Monika
+            </h2>
+            <div class="fatal-corrupt-text text-2xl sm:text-4xl text-red-500 font-bold tracking-tight max-w-2xl px-4 break-all">
+              失败了失败了失败了失败了失败了失败了失败了失败了失败了失败了失败了失败了失败了失败了
+            </div>
+            <p class="fatal-corrupt-text text-xl sm:text-2xl text-cyan-300 font-mono tracking-widest mt-3">
+              我 爱 你 我 爱 你 我 爱 你 我 爱 你
+            </p>
+          </div>
+          <div class="absolute top-4 left-6 fatal-corrupt-text text-sm sm:text-lg text-red-400">
+            FATAL_EXCEPTION_DOKI_ABORT
+          </div>
+          <div class="absolute bottom-6 right-8 fatal-corrupt-text text-base sm:text-xl text-red-600">
+            Just Monika.
+          </div>
+        `;
+
+        this.screenShake = 45;
+
+        setTimeout(() => {
+          try {
+            window.close();
+          } catch (err) {}
+          setTimeout(() => {
+            try {
+              window.location.replace('about:blank');
+            } catch (e) {
+              document.body.innerHTML = '';
+              document.body.style.background = '#000000';
+            }
+          }, 60);
+        }, 1000);
+      }
+
+      spawnJustMonikaGhosts() {
+        const c = this.terrorElements.ghostContainer;
+        if (!c) return;
+        c.innerHTML = '';
+        c.classList.remove('hidden');
+
+        const positions = [
+          { top: '6%', left: '8%', size: '1.8rem', rot: '-8deg' },
+          { top: '15%', right: '12%', size: '2.4rem', rot: '6deg' },
+          { top: '38%', left: '4%', size: '3.2rem', rot: '-12deg' },
+          { top: '48%', right: '6%', size: '2.8rem', rot: '14deg' },
+          { bottom: '14%', left: '16%', size: '3.6rem', rot: '-4deg' },
+          { bottom: '8%', right: '20%', size: '4.2rem', rot: '8deg' },
+          { top: '75%', left: '42%', size: '2.2rem', rot: '-18deg' },
+          { top: '22%', left: '35%', size: '1.6rem', rot: '5deg' }
+        ];
+
+        positions.forEach(p => {
+          const el = document.createElement('div');
+          el.className = 'just-monika-ghost';
+          el.textContent = 'Just Monika';
+          el.style.fontSize = p.size;
+          el.style.transform = `rotate(${p.rot})`;
+          if (p.top) el.style.top = p.top;
+          if (p.bottom) el.style.bottom = p.bottom;
+          if (p.left) el.style.left = p.left;
+          if (p.right) el.style.right = p.right;
+          c.appendChild(el);
+        });
+      }
+
+      nextLevel() {
+        // 进入下一关时彻底重置关卡持续崩坏效果
+        this.clearLevelCorruption();
+        this.levelDeaths = 0;
+
+        this.ui.modalOverlay.classList.add('hidden');
+        if (this.currentLevel + 1 < this.totalLevels) {
+          this.loadLevel(this.currentLevel + 1);
+        } else {
+          this.restartWholeGame();
+        }
+      }
+
+      applyLevelCorruption(stage) {
+        if (stage < 2) return;
+        this.isLevelCorrupted = true;
+        this.inGameCorruptionStage = stage;
+        this.inGameGlitchSliceTimer = Math.floor(Math.random() * 120 + 90);
+
+        if (this.ui.gameWrapper) {
+          this.ui.gameWrapper.classList.remove(
+            'level-corrupt-stage-2',
+            'level-corrupt-stage-3',
+            'level-corrupt-stage-4'
+          );
+          const stageCls = stage === 2 ? 'level-corrupt-stage-2' : (stage === 3 ? 'level-corrupt-stage-3' : 'level-corrupt-stage-4');
+          this.ui.gameWrapper.classList.add(stageCls);
+        }
+      }
+
+      clearLevelCorruption() {
+        this.isLevelCorrupted = false;
+        this.inGameCorruptionStage = 0;
+        this.inGameGlitchActiveFrames = 0;
+
+        if (this.ui.gameWrapper) {
+          this.ui.gameWrapper.classList.remove(
+            'level-corrupt-stage-2',
+            'level-corrupt-stage-3',
+            'level-corrupt-stage-4'
+          );
+        }
+      }
+
+      initSettingsUI() {
+        this.ui.sliderBallSpeed.value = this.settings.ballSpeed.toString();
+        this.ui.ballSpeedVal.textContent = `${this.settings.ballSpeed.toFixed(1)}x`;
+
+        this.ui.sliderDropRate.value = this.settings.dropRate.toString();
+        this.ui.dropRateVal.textContent = `${Math.round(this.settings.dropRate * 100)}%`;
+
+        this.ui.sliderSensitivity.value = this.settings.sensitivity.toString();
+        this.ui.sensitivityVal.textContent = `${this.settings.sensitivity.toFixed(1)}x`;
+
+        this.updateDisplayModeButtonsUI(this.settings.displayMode);
+      }
+
+      updateDisplayModeButtonsUI(mode) {
+        this.ui.displayModeBtns.forEach((btn) => {
+          if (btn.dataset.mode === mode) {
+            btn.classList.add('border-pink-400', 'bg-pink-100', 'text-pink-700');
+            btn.classList.remove('border-pink-200', 'bg-white', 'text-pink-600');
+          } else {
+            btn.classList.remove('border-pink-400', 'bg-pink-100', 'text-pink-700');
+            btn.classList.add('border-pink-200', 'bg-white', 'text-pink-600');
+          }
+        });
+
+        const labels = { window: '窗口模式', borderless: '无边框模式', fullscreen: '全屏模式' };
+        this.ui.displayModeBadge.textContent = labels[mode] || '窗口模式';
+      }
+
+      applyDisplayMode(mode, triggerFullscreenRequest = true) {
+        this.settings.displayMode = mode;
+        this.updateDisplayModeButtonsUI(mode);
+        this.saveSettings();
+
+        const wrapper = this.ui.gameWrapper;
+        const floatHud = this.ui.floatingQuickHud;
+
+        if (mode === 'window') {
+          if (document.fullscreenElement) {
+            try { document.exitFullscreen(); } catch (e) {}
+          }
+          wrapper.classList.remove('mode-borderless');
+          floatHud.classList.add('hidden');
+          this.ui.mainHeader.classList.remove('hidden');
+        } else if (mode === 'borderless') {
+          if (document.fullscreenElement) {
+            try { document.exitFullscreen(); } catch (e) {}
+          }
+          wrapper.classList.add('mode-borderless');
+          floatHud.classList.remove('hidden');
+          this.ui.mainHeader.classList.add('hidden');
+        } else if (mode === 'fullscreen') {
+          wrapper.classList.add('mode-borderless');
+          floatHud.classList.remove('hidden');
+          this.ui.mainHeader.classList.add('hidden');
+
+          if (triggerFullscreenRequest && !document.fullscreenElement) {
+            const el = document.documentElement;
+            const rfs = el.requestFullscreen || el.webkitRequestFullscreen || el.mozRequestFullScreen || el.msRequestFullscreen;
+            if (rfs) {
+              rfs.call(el).catch(() => {
+                this.settings.displayMode = 'borderless';
+                this.updateDisplayModeButtonsUI('borderless');
+                this.saveSettings();
+              });
+            }
+          }
+        }
+
+        setTimeout(() => this.setupCanvasDPI(), 100);
+      }
+
+      saveSettings() {
+        try {
+          localStorage.setItem('ddlc_breakout_settings', JSON.stringify(this.settings));
+        } catch (e) {}
+      }
+
+      openSettings() {
+        if (this.state === 'PLAYING') {
+          this.pauseGame();
+        }
+        this.initSettingsUI();
+        this.ui.settingsOverlay.classList.remove('hidden');
+      }
+
+      closeSettings() {
+        this.ui.settingsOverlay.classList.add('hidden');
+      }
+
+      openInstructions() {
+        if (this.state === 'PLAYING') {
+          this.pauseGame();
+        }
+        this.ui.instructionsOverlay.classList.remove('hidden');
+      }
+
+      closeInstructions() {
+        this.ui.instructionsOverlay.classList.add('hidden');
+      }
+
+      returnToTitle() {
+        this.ui.pauseMenuOverlay.classList.add('hidden');
+        this.ui.settingsOverlay.classList.add('hidden');
+        this.ui.instructionsOverlay.classList.add('hidden');
+        this.ui.modalOverlay.classList.add('hidden');
+
+        this.state = 'TITLE';
+        this.input.isFrozen = true;
+        this.drops = [];
+        this.balls = [];
+        this.particles.clear();
+        this.score = 0;
+        this.lives = 5;
+        this.currentFailureStage = 1;
+        this.combo = 0;
+        this.pierceTimer = 0;
+
+        this.paddle.reset();
+        this.brickGrid.initGrid(0);
+        this.bgm.restoreNormal();
+        this.updateHUD();
+
+        this.ui.titleScreenOverlay.classList.remove('hidden', 'opacity-0', 'pointer-events-none');
+      }
+
+      startGame() {
+        this.state = 'PLAYING';
+        this.input.isFrozen = false;
+        this.bgm.play();
+        for (const ball of this.balls) {
+          if (ball.stuckToPaddle) ball.launch();
+        }
+        this.ui.launchHint.style.opacity = '0';
+      }
+
+      pauseGame() {
+        if (this.state === 'PLAYING' || this.state === 'READY') {
+          this.prevState = this.state;
+          this.state = 'PAUSED';
+          this.input.isFrozen = true;
+          this.ui.pauseLevelLabel.textContent = `第 ${this.currentLevel + 1} / 5 关`;
+          this.ui.pauseMenuOverlay.classList.remove('hidden');
+        }
+      }
+
+      resumeGame() {
+        if (this.state === 'PAUSED') {
+          this.state = this.prevState || 'PLAYING';
+          this.input.isFrozen = false;
+          this.ui.pauseMenuOverlay.classList.add('hidden');
+        }
+      }
+
+      togglePause() {
+        if (this.state === 'PLAYING' || this.state === 'READY') {
+          this.pauseGame();
+        } else if (this.state === 'PAUSED') {
+          this.resumeGame();
+        }
+      }
+
+      showModal(speaker, title, subtitle, showStats, btnText, isGlitch = false) {
+        if (!isGlitch) {
+          this.clearTerrorGlitches();
+          this.ui.modalCard.className = 'relative w-full max-w-md vn-frame rounded-2xl p-6 sm:p-7 pt-8 shadow-2xl border-3 border-pink-400';
+          this.ui.modalSpeakerTag.className = 'absolute -top-3.5 left-6 vn-nametag text-white px-4 py-0.5 rounded-full font-bold text-xs tracking-wider border border-white shadow';
+          this.ui.modalTitle.className = 'text-xl sm:text-2xl font-black text-pink-600 mb-1.5 font-ddlc tracking-wide';
+          this.ui.modalSubtitle.className = 'text-pink-800 text-xs sm:text-sm leading-relaxed mb-4 font-semibold';
+          this.ui.modalActionBtn.className = 'w-full py-3 px-5 rounded-xl font-bold text-white bg-pink-500 hover:bg-pink-600 transition active:scale-95 shadow text-sm font-ddlc tracking-wider';
+          this.ui.modalOverlay.className = 'absolute inset-0 bg-pink-950/40 backdrop-blur-[3px] flex flex-col items-center justify-center z-30 transition-all p-4';
+          this.ui.modalStats.className = 'hidden grid-cols-2 gap-2.5 mb-4 bg-pink-100/70 p-3 rounded-xl border border-pink-300 text-left font-ddlc text-xs sm:text-sm';
+          this.ui.mainHeader.classList.remove('pointer-events-none');
+          this.ui.floatingQuickHud.classList.remove('pointer-events-none');
+        }
+
+        this.ui.modalSpeakerName.textContent = speaker;
+        this.ui.modalTitle.textContent = title;
+        this.ui.modalSubtitle.textContent = subtitle;
+        this.ui.modalActionBtn.innerHTML = `<span>${btnText}</span>`;
+
+        if (isGlitch) {
+          this.ui.modalCard.classList.add('bg-black/95', 'border-red-600', 'font-mono-glitch');
+          this.ui.modalSpeakerTag.classList.add('bg-red-700');
+          this.ui.modalTitle.classList.add('text-red-500');
+          this.ui.modalSubtitle.classList.add('text-red-300');
+        }
+
+        if (showStats) {
+          this.ui.modalStats.classList.remove('hidden');
+          this.ui.modalStats.classList.add('grid');
+          this.ui.finalScore.textContent = this.score;
+          this.ui.maxCombo.textContent = `x${this.maxComboReached}`;
+        } else {
+          this.ui.modalStats.classList.add('hidden');
+          this.ui.modalStats.classList.remove('grid');
+        }
+
+        this.ui.modalOverlay.classList.remove('hidden');
+      }
+
+      /**
+       * triggerProgressiveFailure - 触发五重渐进崩坏失败界面，并驱动 BGM 升调降调与扭曲
+       */
+      triggerProgressiveFailure(stage) {
+        this.currentFailureStage = stage;
+        // 同步通知 BGM 引擎与白噪引擎进入对应崩坏状态
+        this.bgm.setStage(stage);
+        this.sound.startContinuousFailureStageSound(stage);
+        this.clearTerrorGlitchesDomOnly();
+
+        this.input.isFrozen = true;
+        this.ui.mainHeader.classList.add('pointer-events-none');
+        this.ui.floatingQuickHud.classList.add('pointer-events-none');
+
+        const card = this.ui.modalCard;
+        const tag = this.ui.modalSpeakerTag;
+        const name = this.ui.modalSpeakerName;
+        const title = this.ui.modalTitle;
+        const sub = this.ui.modalSubtitle;
+        const btn = this.ui.modalActionBtn;
+        const stats = this.ui.modalStats;
+        const overlay = this.ui.modalOverlay;
+
+        card.classList.remove('modal-stage-3', 'modal-stage-4', 'modal-stage-5', 'corrupt-jitter', 'corrupt-chromatic', 'bg-black/95', 'border-red-600', 'font-mono-glitch');
+        tag.classList.remove('bg-red-700', 'bg-purple-700', 'corrupt-jitter');
+        title.classList.remove('text-red-500', 'text-purple-600', 'corrupt-chromatic', 'font-mono-glitch');
+        sub.classList.remove('text-red-300', 'text-purple-900', 'font-mono-glitch');
+        btn.classList.remove('bg-red-600', 'hover:bg-red-700', 'bg-purple-600', 'hover:bg-purple-700');
+        overlay.classList.remove('vignette-corrupt-3', 'vignette-corrupt-4', 'vignette-corrupt-5');
+
+        stats.classList.add('hidden');
+        stats.classList.remove('grid');
+
+        if (stage === 1) {
+          name.textContent = '部活';
+          title.textContent = '小小的失误';
+          title.className = 'text-xl sm:text-2xl font-black text-pink-600 mb-1.5 font-ddlc tracking-wide';
+          sub.textContent = '没关系的，稍微调整一下呼吸，放轻松……找找手感，我们再来一次吧~';
+          sub.className = 'text-pink-800 text-xs sm:text-sm leading-relaxed mb-4 font-semibold';
+          btn.innerHTML = '<span>继续部活</span>';
+          btn.className = 'w-full py-3 px-5 rounded-xl font-bold text-white bg-pink-500 hover:bg-pink-600 transition active:scale-95 shadow text-sm font-ddlc tracking-wider';
+        } else if (stage === 2) {
+          name.textContent = '部活';
+          title.textContent = '没关系没关系没关系没关系没关系没关系';
+          title.className = 'text-lg sm:text-xl font-black text-pink-600 mb-1.5 font-ddlc tracking-tighter corrupt-chromatic';
+          sub.textContent = '刚才那是手滑了吗？没关系的……应该没关系的，对吧？只要你还愿意留下来陪着我……';
+          sub.className = 'text-pink-800 text-xs sm:text-sm leading-relaxed mb-4 font-semibold';
+          btn.innerHTML = '<span>继续……部活</span>';
+          btn.className = 'w-full py-3 px-5 rounded-xl font-bold text-white bg-pink-500 hover:bg-pink-600 transition active:scale-95 shadow text-sm font-ddlc tracking-wider';
+          this.glitchTimer = 55;
+        } else if (stage === 3) {
+          this.terrorElements.blackout.style.opacity = '1';
+          setTimeout(() => {
+            this.terrorElements.blackout.style.opacity = '0';
+            document.body.classList.add('terror-page-active-3');
+          }, 90);
+
+          card.classList.add('modal-stage-3', 'corrupt-chromatic');
+          tag.classList.add('bg-purple-700');
+          overlay.classList.add('vignette-corrupt-3');
+          name.textContent = '[ ？？？ ]';
+          title.textContent = '读取异常 (0x03_DESYNC)';
+          title.className = 'text-xl sm:text-2xl font-black text-purple-700 mb-1.5 font-mono-glitch tracking-wide corrupt-jitter';
+          
+          sub.textContent = '看着我就好了';
+          sub.className = 'text-purple-900 text-base sm:text-lg leading-relaxed mb-5 font-black font-ddlc corrupt-jitter tracking-widest text-center py-2';
+          
+          btn.innerHTML = '<span class="tracking-widest">继 续 尝 试</span>';
+          btn.className = 'w-full py-3 px-5 rounded-xl font-bold text-white bg-purple-600 hover:bg-purple-700 transition active:scale-95 shadow text-sm font-ddlc tracking-wider';
+          this.glitchTimer = 95;
+          this.screenShake = 12;
+        } else if (stage === 4) {
+          document.body.classList.add('terror-page-active-4');
+          card.classList.add('modal-stage-4');
+          tag.classList.add('bg-red-700', 'corrupt-jitter');
+          overlay.classList.add('vignette-corrupt-4');
+          name.textContent = '[ M̷o̷n̷i̷k̷a̷ ]';
+          title.textContent = 'script.rpy: Line 404 [CRITICAL]';
+          title.className = 'text-xl sm:text-2xl font-black text-red-500 mb-1.5 font-mono-glitch tracking-wide corrupt-jitter';
+          sub.textContent = '只剩下最后一次机会了呢……如果这次也失败了，我们就会被彻底重置对吧？我不要……我绝不放你离开这个房间。';
+          sub.className = 'text-red-300 text-xs sm:text-sm leading-relaxed mb-4 font-mono-glitch';
+          btn.innerHTML = '<span class="tracking-widest">不 要 离 开</span>';
+          btn.className = 'w-full py-3 px-5 rounded-xl font-bold text-white bg-red-600 hover:bg-red-700 transition active:scale-95 shadow text-sm font-mono-glitch';
+          this.glitchTimer = 145;
+          this.screenShake = 18;
+        } else if (stage === 5) {
+          this.terrorElements.blackout.style.opacity = '1';
+          setTimeout(() => {
+            this.terrorElements.blackout.style.opacity = '0';
+            document.body.classList.add('terror-page-active-5');
+            this.spawnJustMonikaGhosts();
+          }, 240);
+
+          card.classList.add('modal-stage-5');
+          tag.classList.add('bg-red-900', 'corrupt-jitter');
+          overlay.classList.add('vignette-corrupt-5');
+
+          name.textContent = 'Just Monika';
+          title.textContent = 'Just Monika';
+          title.className = 'text-2xl sm:text-3xl font-black text-red-500 mb-2 font-mono-glitch tracking-widest corrupt-jitter';
+          
+          sub.textContent = 'Just Monika Just Monika Just Monika Just Monika Just Monika Just Monika Just Monika Just Monika Just Monika';
+          sub.className = 'text-red-400 text-xs sm:text-sm leading-relaxed mb-4 font-mono-glitch tracking-wider break-all';
+
+          stats.classList.remove('hidden');
+          stats.classList.add('grid');
+          stats.className = 'grid grid-cols-2 gap-2.5 mb-4 bg-black/80 p-3 rounded-xl border border-red-800 text-left font-mono-glitch text-xs sm:text-sm';
+          
+          stats.innerHTML = `
+            <div class="bg-black/90 p-2.5 rounded-lg border border-red-900">
+              <span class="text-red-500 block text-[11px] font-bold">Just Monika</span>
+              <span class="text-red-400 text-base font-black">Just Monika</span>
+            </div>
+            <div class="bg-black/90 p-2.5 rounded-lg border border-red-900">
+              <span class="text-red-500 block text-[11px] font-bold">Just Monika</span>
+              <span class="text-red-400 text-base font-black">Just Monika</span>
+            </div>
+          `;
+
+          btn.innerHTML = '<span class="tracking-widest font-black text-base">Just Monika</span>';
+          btn.className = 'w-full py-3.5 px-5 rounded-xl font-bold text-white bg-red-800 hover:bg-red-900 transition active:scale-95 shadow text-sm font-mono-glitch border border-red-500';
+          this.glitchTimer = 999;
+          this.screenShake = 22;
+        }
+
+        overlay.classList.remove('hidden');
+      }
+
+      clearTerrorGlitchesDomOnly() {
+        document.body.classList.remove('terror-page-active-3', 'terror-page-active-4', 'terror-page-active-5');
+        if (this.terrorElements.blackout) {
+          this.terrorElements.blackout.style.opacity = '0';
+        }
+        if (this.terrorElements.sliceLayer) {
+          this.terrorElements.sliceLayer.classList.add('hidden');
+          this.terrorElements.sliceLayer.innerHTML = '';
+        }
+        if (this.terrorElements.ghostContainer) {
+          this.terrorElements.ghostContainer.classList.add('hidden');
+          this.terrorElements.ghostContainer.innerHTML = '';
+        }
+      }
+
+      updateHUD() {
+        this.ui.highScore.textContent = this.highScore;
+        this.ui.levelDisplay.textContent = `${this.currentLevel + 1} / ${this.totalLevels}`;
+        this.ui.levelNameDisplay.textContent = this.brickGrid.levels[this.currentLevel].name;
+        this.ui.ballCountDisplay.textContent = `球数 ${this.balls.length}`;
+
+        if (this.combo > 1) {
+          this.ui.comboContainer.style.opacity = '1';
+          this.ui.combo.textContent = `x${this.combo}`;
+        } else {
+          this.ui.comboContainer.style.opacity = '0';
+        }
+
+        if (this.pierceTimer > 0) {
+          this.ui.pierceIndicator.classList.remove('hidden');
+          this.ui.pierceIndicator.classList.add('flex');
+          this.ui.clubLogoDefault.classList.add('hidden');
+          this.ui.pierceTimeDisplay.textContent = (this.pierceTimer / 60).toFixed(1) + 's';
+        } else {
+          this.ui.pierceIndicator.classList.add('hidden');
+          this.ui.pierceIndicator.classList.remove('flex');
+          this.ui.clubLogoDefault.classList.remove('hidden');
+        }
+
+        this.ui.livesContainer.innerHTML = '';
+        for (let i = 0; i < this.maxLives; i++) {
+          const heart = document.createElement('span');
+          heart.className = `text-base transition-all duration-300 ${
+            i < this.lives ? 'text-rose-500 scale-100 heart-beat' : 'text-pink-200 scale-90 opacity-40'
+          }`;
+          heart.textContent = '♥';
+          this.ui.livesContainer.appendChild(heart);
+        }
+      }
+
+      maybeSpawnDrop(x, y) {
+        const currentRate = typeof this.settings.dropRate === 'number' ? this.settings.dropRate : 0.34;
+        if (Math.random() < currentRate) {
+          const roll = Math.random();
+          let type = 'natsuki_cupcake';
+
+          if (roll < 0.36) {
+            type = 'natsuki_cupcake';
+          } else if (roll < 0.68) {
+            type = 'sayori_bow';
+          } else if (roll < 0.94) {
+            type = 'yuri_knife';
+          } else {
+            type = 'monika_heart';
+          }
+
+          this.drops.push(new DDLCDropItem(x, y, type));
+        }
+      }
+
+      applyPowerup(drop) {
+        this.sound.playPowerup(drop.type);
+        const px = this.paddle.x + this.paddle.width / 2;
+        const py = this.paddle.y;
+
+        if (drop.type === 'monika_heart') {
+          if (this.lives < this.maxLives) {
+            this.lives++;
+            // 恢复生命时，BGM 崩坏程度逐渐修复向原调靠拢
+            const newStage = Math.min(5, Math.max(1, 6 - this.lives));
+            this.bgm.setStage(newStage);
+            this.particles.addPoemWord(px, py - 20, '+1 生命', '#2ecc71', true);
+          } else {
+            this.score += 300;
+            this.particles.addPoemWord(px, py - 20, '+300 分', '#2ecc71', true);
+          }
+          this.particles.addShockwave(px, py, '#2ecc71', 65);
+        } else if (drop.type === 'yuri_knife') {
+          this.pierceTimer = 120;
+          this.particles.addShockwave(px, py, '#9b59b6', 80);
+          this.particles.addPoemWord(px, py - 20, '贯穿模式 (2s)', '#9b59b6', true);
+        } else if (drop.type === 'natsuki_cupcake') {
+          const newBall = new DDLCHeartBall(this.vWidth, this.vHeight, px, py - 14, 0, 0, this.settings.ballSpeed);
+          newBall.launch();
+          this.balls.push(newBall);
+          this.particles.addShockwave(px, py, '#ff477e', 50);
+          this.particles.addPoemWord(px, py - 20, '+1 球', '#ff477e', true);
+        } else if (drop.type === 'sayori_bow') {
+          const currentCount = this.balls.length;
+          const spawnCount = Math.min(currentCount, 24 - currentCount);
+          for (let i = 0; i < spawnCount; i++) {
+            const src = this.balls[i % currentCount];
+            const duplicate = new DDLCHeartBall(this.vWidth, this.vHeight, src.x, src.y, 0, 0, this.settings.ballSpeed);
+            const angle = Math.random() * Math.PI * 2;
+            duplicate.vx = Math.cos(angle) * src.speed;
+            duplicate.vy = -Math.abs(Math.sin(angle) * src.speed);
+            duplicate.stuckToPaddle = false;
+            this.balls.push(duplicate);
+          }
+          this.particles.addShockwave(px, py, '#ff6b81', 75);
+          this.particles.addPoemWord(px, py - 20, '球数翻倍', '#ff6b81', true);
+        }
+
+        this.updateHUD();
+      }
+
+      handleCollisions() {
+        const paddle = this.paddle;
+        const isPierce = this.pierceTimer > 0;
+
+        for (let i = this.drops.length - 1; i >= 0; i--) {
+          const d = this.drops[i];
+          d.update();
+
+          if (
+            d.y + 15 >= paddle.y &&
+            d.y - 15 <= paddle.y + paddle.height &&
+            d.x >= paddle.x - 14 &&
+            d.x <= paddle.x + paddle.width + 14
+          ) {
+            this.applyPowerup(d);
+            this.drops.splice(i, 1);
+            continue;
+          }
+
+          if (d.y > this.vHeight + 25) {
+            this.drops.splice(i, 1);
+          }
+        }
+
+        for (let bIdx = this.balls.length - 1; bIdx >= 0; bIdx--) {
+          const ball = this.balls[bIdx];
+          ball.update(paddle);
+
+          if (ball.x - ball.radius <= 0) {
+            ball.x = ball.radius;
+            ball.vx = -ball.vx;
+            ball.triggerSquash(0.65);
+            this.particles.addShockwave(ball.x, ball.y, '#ff7aa2', 20);
+            this.sound.playWallHit();
+          } else if (ball.x + ball.radius >= this.vWidth) {
+            ball.x = this.vWidth - ball.radius;
+            ball.vx = -ball.vx;
+            ball.triggerSquash(0.65);
+            this.particles.addShockwave(ball.x, ball.y, '#ff7aa2', 20);
+            this.sound.playWallHit();
+          }
+
+          if (ball.y - ball.radius <= 0) {
+            ball.y = ball.radius;
+            ball.vy = -ball.vy;
+            ball.triggerSquash(0.65);
+            this.particles.addShockwave(ball.x, ball.y, '#ff7aa2', 20);
+            this.sound.playWallHit();
+          }
+
+          if (
+            ball.vy > 0 &&
+            ball.y + ball.radius >= paddle.y &&
+            ball.y - ball.radius <= paddle.y + paddle.height &&
+            ball.x >= paddle.x - ball.radius &&
+            ball.x <= paddle.x + paddle.width + ball.radius
+          ) {
+            this.combo = 0;
+            this.updateHUD();
+
+            const paddleCenter = paddle.x + paddle.width / 2;
+            const hitOffset = (ball.x - paddleCenter) / (paddle.width / 2);
+            const clampedOffset = Math.max(-1, Math.min(1, hitOffset));
+
+            const maxAngle = Math.PI * 0.36;
+            const bounceAngle = clampedOffset * maxAngle;
+
+            ball.speed = Math.min(ball.speed + 0.04, ball.maxSpeed);
+            ball.vx = ball.speed * Math.sin(bounceAngle);
+            ball.vy = -ball.speed * Math.cos(bounceAngle);
+            ball.y = paddle.y - ball.radius - 1;
+
+            ball.triggerSquash(0.5);
+            paddle.triggerDip(5.2);
+            this.particles.addShockwave(ball.x, paddle.y, isPierce ? '#c084fc' : '#ff7aa2', 32);
+
+            this.sound.playPaddleHit(clampedOffset);
+            this.particles.createPoemBurst(ball.x, paddle.y, isPierce ? '#9333ea' : '#ff7aa2');
+          }
+
+          for (let r = 0; r < this.brickGrid.rows; r++) {
+            for (let c = 0; c < this.brickGrid.cols; c++) {
+              const b = this.brickGrid.bricks[r][c];
+              if (!b || !b.alive) continue;
+
+              const nearestX = Math.max(b.x, Math.min(ball.x, b.x + b.width));
+              const nearestY = Math.max(b.y, Math.min(ball.y, b.y + b.height));
+              const distX = ball.x - nearestX;
+              const distY = ball.y - nearestY;
+
+              if (distX * distX + distY * distY < ball.radius * ball.radius) {
+                if (isPierce) {
+                  b.hp = 0;
+                } else {
+                  b.hp--;
+                }
+
+                this.hitstopFrames = 2;
+                ball.triggerSquash(0.62);
+
+                if (b.hp <= 0) {
+                  b.alive = false;
+                  this.brickGrid.totalBricks--;
+
+                  this.combo++;
+                  this.maxComboReached = Math.max(this.maxComboReached, this.combo);
+                  const comboBonus = (this.combo - 1) * 10;
+                  const earnedScore = b.points + comboBonus;
+                  this.score += earnedScore;
+
+                  if (this.score > this.highScore) {
+                    this.highScore = this.score;
+                    localStorage.setItem('ddlc_breakout_high_score', this.highScore.toString());
+                  }
+
+                  this.screenShake = Math.min(this.screenShake + 3.2, 8);
+                  this.particles.addShockwave(nearestX, nearestY, b.color, 36);
+                  this.particles.createPoemBurst(nearestX, nearestY, b.color, this.combo > 3);
+                  this.particles.addPoemWord(b.x + b.width / 2, b.y, `+${earnedScore}`, b.color);
+                  this.sound.playBrickHit(this.combo, b.isHardcover);
+
+                  if (this.combo >= 2 && Math.random() < 0.45) {
+                    this.particles.triggerRandomPoemWord(b.x + b.width / 2, b.y, b.color);
+                  }
+
+                  this.maybeSpawnDrop(b.x + b.width / 2, b.y + b.height / 2);
+
+                  if (this.brickGrid.totalBricks <= 0) {
+                    this.state = 'LEVEL_CLEAR';
+                    this.sound.playVictory();
+                    this.clearLevelCorruption();
+                    if (this.currentLevel + 1 < this.totalLevels) {
+                      this.showModal('部活', '章节达成！', '诗篇已全部集齐，准备翻开下一篇吗？', false, '进入下一关');
+                    } else {
+                      this.state = 'VICTORY';
+                      this.showModal('部活', '完美通关！', '恭喜你完成了全部部活诗篇！', true, '重新挑战');
+                    }
+                    return;
+                  }
+                } else {
+                  this.sound.playBrickHit(0, true);
+                  this.particles.createPoemBurst(nearestX, nearestY, '#fef08a', false);
+                  this.particles.addShockwave(nearestX, nearestY, '#fde047', 24);
+                }
+
+                if (!isPierce) {
+                  const prevX = ball.x - ball.vx;
+                  const prevY = ball.y - ball.vy;
+
+                  const overlapLeft = (prevX + ball.radius) <= b.x;
+                  const overlapRight = (prevX - ball.radius) >= (b.x + b.width);
+                  const overlapTop = (prevY + ball.radius) <= b.y;
+                  const overlapBottom = (prevY - ball.radius) >= (b.y + b.height);
+
+                  if (overlapLeft || overlapRight) {
+                    ball.vx = -ball.vx;
+                  } else if (overlapTop || overlapBottom) {
+                    ball.vy = -ball.vy;
+                  } else {
+                    ball.vy = -ball.vy;
+                  }
+                }
+                this.updateHUD();
+                break;
+              }
+            }
+          }
+
+          if (ball.y - ball.radius > this.vHeight) {
+            this.balls.splice(bIdx, 1);
+            this.ui.ballCountDisplay.textContent = `球数 ${this.balls.length}`;
+
+            if (this.balls.length === 0) {
+              if (this.isJustMonikaNextLife) {
+                this.triggerUltimateCrashSequence();
+                return;
+              }
+
+              this.lives--;
+              this.combo = 0;
+              this.pierceTimer = 0;
+              this.updateHUD();
+
+              const stage = Math.min(5, Math.max(1, 5 - this.lives));
+
+              if (this.lives <= 0) {
+                this.state = 'GAMEOVER';
+                this.input.isFrozen = true;
+                this.triggerProgressiveFailure(5);
+              } else {
+                this.state = 'LIFE_LOST';
+                this.input.isFrozen = true;
+                this.triggerProgressiveFailure(stage);
+              }
+            }
+          }
+        }
+      }
+
+      initAmbientAtmosphere() {
+        this.ambientTime = 0;
+        this.windStrength = 0.8;
+        this.windGustTimer = 0;
+
+        this.windowLightAlpha = 0.18;
+
+        this.chalkDust = [];
+        for (let i = 0; i < 32; i++) {
+          this.chalkDust.push({
+            x: Math.random() * (this.vWidth * 0.75),
+            y: Math.random() * this.vHeight,
+            radius: Math.random() * 2.2 + 1.2,
+            speedY: -(Math.random() * 0.2 + 0.06),
+            speedX: (Math.random() - 0.4) * 0.18,
+            alpha: Math.random() * 0.32 + 0.1,
+            pulseSeed: Math.random() * Math.PI * 2
+          });
+        }
+
+        this.campusNotes = [];
+        const noteSymbols = ['♪', '♫', '♩', '♬'];
+        for (let i = 0; i < 7; i++) {
+          this.campusNotes.push({
+            symbol: noteSymbols[i % noteSymbols.length],
+            x: Math.random() * this.vWidth,
+            y: Math.random() * this.vHeight,
+            size: Math.random() * 5 + 16,
+            speedY: Math.random() * 0.3 + 0.18,
+            speedX: Math.random() * 0.25 + 0.1,
+            swaySeed: Math.random() * Math.PI * 2,
+            alpha: Math.random() * 0.13 + 0.08
+          });
+        }
+
+        this.ambientBubbles = [];
+        for (let i = 0; i < 10; i++) {
+          this.ambientBubbles.push({
+            x: Math.random() * this.vWidth,
+            y: Math.random() * this.vHeight,
+            radius: Math.random() * 7 + 5,
+            speedY: Math.random() * 0.28 + 0.14,
+            swaySpeed: Math.random() * 0.018 + 0.01,
+            alpha: Math.random() * 0.18 + 0.08,
+            isHeart: Math.random() > 0.5,
+            seed: Math.random() * Math.PI * 2
+          });
+        }
+
+        this.ambientBokeh = [];
+        for (let i = 0; i < 6; i++) {
+          this.ambientBokeh.push({
+            x: Math.random() * this.vWidth,
+            y: Math.random() * (this.vHeight * 0.8),
+            radius: Math.random() * 70 + 45,
+            alphaBase: Math.random() * 0.08 + 0.04,
+            pulseSpeed: Math.random() * 0.01 + 0.005,
+            seed: Math.random() * Math.PI * 2
+          });
+        }
+      }
+
+      updateAmbientAtmosphere() {
+        this.ambientTime += 0.02;
+        this.windGustTimer += 0.01;
+
+        for (const d of this.chalkDust) {
+          d.y += d.speedY;
+          d.x += d.speedX + Math.sin(this.ambientTime * 0.7 + d.pulseSeed) * 0.15;
+          if (d.y < -10) {
+            d.y = this.vHeight + 10;
+            d.x = Math.random() * (this.vWidth * 0.75);
+          }
+        }
+
+        for (const n of this.campusNotes) {
+          n.y -= n.speedY;
+          n.x += n.speedX + Math.sin(this.ambientTime + n.swaySeed) * 0.35;
+          if (n.y < -20 || n.x > this.vWidth + 20) {
+            n.y = this.vHeight + 15;
+            n.x = Math.random() * (this.vWidth * 0.85);
+          }
+        }
+
+        for (const b of this.ambientBubbles) {
+          b.y -= b.speedY;
+          b.x += Math.sin(this.ambientTime * b.swaySpeed + b.seed) * 0.32;
+          if (b.y < -20) {
+            b.y = this.vHeight + 15;
+            b.x = Math.random() * this.vWidth;
+          }
+        }
+      }
+
+      drawAmbientAtmosphere(ctx) {
+        ctx.save();
+
+        ctx.save();
+        ctx.strokeStyle = 'rgba(235, 185, 205, 0.12)';
+        ctx.lineWidth = 1;
+        const lineSpacing = 32;
+        for (let y = lineSpacing; y < this.vHeight; y += lineSpacing) {
+          ctx.beginPath();
+          ctx.moveTo(10, y);
+          ctx.lineTo(this.vWidth - 10, y);
+          ctx.stroke();
+        }
+        ctx.restore();
+
+        const beamGrad = ctx.createLinearGradient(0, 0, this.vWidth * 0.85, this.vHeight);
+        beamGrad.addColorStop(0, 'rgba(255, 255, 255, 0.28)');
+        beamGrad.addColorStop(0.3, 'rgba(255, 248, 240, 0.15)');
+        beamGrad.addColorStop(0.7, 'rgba(255, 238, 246, 0.05)');
+        beamGrad.addColorStop(1, 'rgba(255, 255, 255, 0)');
+        ctx.fillStyle = beamGrad;
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.lineTo(this.vWidth * 0.55, 0);
+        ctx.lineTo(this.vWidth * 0.25, this.vHeight);
+        ctx.lineTo(0, this.vHeight);
+        ctx.closePath();
+        ctx.fill();
+
+        ctx.save();
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+        ctx.lineWidth = 16;
+        const windowSlants = [this.vWidth * 0.14, this.vWidth * 0.28, this.vWidth * 0.42];
+        for (const ws of windowSlants) {
+          ctx.beginPath();
+          ctx.moveTo(ws, 0);
+          ctx.lineTo(ws * 0.45, this.vHeight);
+          ctx.stroke();
+        }
+
+        ctx.lineWidth = 11;
+        ctx.beginPath();
+        ctx.moveTo(0, this.vHeight * 0.32);
+        ctx.lineTo(this.vWidth * 0.45, this.vHeight * 0.42);
+        ctx.stroke();
+        ctx.restore();
+
+        for (const bk of this.ambientBokeh) {
+          const pulse = Math.sin(this.ambientTime * bk.pulseSpeed + bk.seed);
+          const currentAlpha = bk.alphaBase + pulse * 0.02;
+          const radGrad = ctx.createRadialGradient(bk.x, bk.y, 0, bk.x, bk.y, bk.radius);
+          radGrad.addColorStop(0, `rgba(255, 248, 236, ${Math.max(0, currentAlpha * 1.4)})`);
+          radGrad.addColorStop(0.6, `rgba(255, 235, 242, ${Math.max(0, currentAlpha)})`);
+          radGrad.addColorStop(1, 'rgba(255, 255, 255, 0)');
+          ctx.fillStyle = radGrad;
+          ctx.beginPath();
+          ctx.arc(bk.x, bk.y, bk.radius, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        for (const d of this.chalkDust) {
+          const pulse = Math.sin(this.ambientTime * 2.2 + d.pulseSeed) * 0.15;
+          ctx.save();
+          ctx.beginPath();
+          ctx.arc(d.x, d.y, d.radius, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(255, 250, 240, ${Math.max(0.04, d.alpha + pulse)})`;
+          ctx.shadowBlur = 3;
+          ctx.shadowColor = 'rgba(255, 235, 210, 0.35)';
+          ctx.fill();
+          ctx.restore();
+        }
+
+        for (const n of this.campusNotes) {
+          ctx.save();
+          ctx.font = `bold ${n.size}px "M PLUS Rounded 1c", sans-serif`;
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+
+          if (this.isLevelCorrupted && Math.random() < 0.28) {
+            const corruptSymbols = ['†', '¿', '§', '0x404', '...', 'error', '心'];
+            const glyph = corruptSymbols[Math.floor(Math.random() * corruptSymbols.length)];
+            ctx.fillStyle = this.inGameCorruptionStage >= 3 ? 'rgba(180, 20, 50, 0.45)' : 'rgba(147, 51, 234, 0.35)';
+            ctx.fillText(glyph, n.x + (Math.random() - 0.5) * 3, n.y);
+          } else {
+            ctx.fillStyle = this.isLevelCorrupted ? 'rgba(180, 90, 130, 0.18)' : `rgba(235, 140, 175, ${n.alpha})`;
+            ctx.fillText(n.symbol, n.x, n.y);
+          }
+          ctx.restore();
+        }
+
+        for (const b of this.ambientBubbles) {
+          ctx.save();
+          ctx.globalAlpha = b.alpha;
+          ctx.translate(b.x, b.y);
+
+          if (b.isHeart) {
+            const s = b.radius * 0.85;
+            ctx.fillStyle = '#ff8ca8';
+            ctx.beginPath();
+            ctx.moveTo(0, -s / 2);
+            ctx.bezierCurveTo(-s / 2, -s, -s, -s / 3, 0, s / 2);
+            ctx.bezierCurveTo(s, -s / 3, s / 2, -s, 0, -s / 2);
+            ctx.fill();
+          } else {
+            const grad = ctx.createRadialGradient(-b.radius * 0.3, -b.radius * 0.3, 1, 0, 0, b.radius);
+            grad.addColorStop(0, 'rgba(255, 255, 255, 0.7)');
+            grad.addColorStop(0.7, 'rgba(255, 210, 225, 0.25)');
+            grad.addColorStop(1, 'rgba(255, 175, 200, 0.08)');
+            ctx.fillStyle = grad;
+            ctx.beginPath();
+            ctx.arc(0, 0, b.radius, 0, Math.PI * 2);
+            ctx.fill();
+          }
+          ctx.restore();
+        }
+
+        ctx.restore();
+      }
+
+      update() {
+        // 实时驱动背景音乐的磁带音高摇摆与抽搐
+        this.bgm.update();
+
+        if (this.pierceTimer > 0) {
+          this.pierceTimer--;
+          if (this.pierceTimer % 15 === 0) this.updateHUD();
+        }
+
+        this.updateAmbientAtmosphere();
+
+        if (this.hitstopFrames > 0) {
+          this.hitstopFrames--;
+          this.particles.update();
+          return;
+        }
+
+        if (this.state === 'PLAYING') {
+          this.paddle.update(this.input, this.settings.sensitivity);
+          this.handleCollisions();
+          this.particles.update();
+        } else if (this.state === 'READY') {
+          this.paddle.update(this.input, this.settings.sensitivity);
+          for (const ball of this.balls) ball.update(this.paddle);
+          this.particles.update();
+        } else if (this.state === 'PAUSED' || this.state === 'TITLE') {
+          this.particles.update();
+        }
+
+        if (this.screenShake > 0) {
+          this.screenShake *= 0.85;
+          if (this.screenShake < 0.2) this.screenShake = 0;
+        }
+
+        if (this.glitchTimer > 0) {
+          this.glitchTimer--;
+          this.ui.glitchOverlay.style.opacity = (this.glitchTimer / 30).toString();
+        }
+      }
+
+      render() {
+        this.ctx.save();
+
+        if (this.screenShake > 0) {
+          const sx = (Math.random() - 0.5) * this.screenShake;
+          const sy = (Math.random() - 0.5) * this.screenShake;
+          this.ctx.translate(sx, sy);
+        }
+
+        this.ctx.clearRect(0, 0, this.vWidth, this.vHeight);
+
+        const bgGrad = this.ctx.createLinearGradient(0, 0, 0, this.vHeight);
+        if (this.isLevelCorrupted) {
+          if (this.inGameCorruptionStage === 2) {
+            bgGrad.addColorStop(0, '#ebd8e5');
+            bgGrad.addColorStop(0.45, '#f5e3ea');
+            bgGrad.addColorStop(1, '#e8ccd9');
+          } else if (this.inGameCorruptionStage === 3) {
+            bgGrad.addColorStop(0, '#d8c2d5');
+            bgGrad.addColorStop(0.45, '#e4c9d5');
+            bgGrad.addColorStop(1, '#cdaabf');
+          } else {
+            bgGrad.addColorStop(0, '#26121f');
+            bgGrad.addColorStop(0.45, '#3d162b');
+            bgGrad.addColorStop(1, '#1f0917');
+          }
+        } else {
+          bgGrad.addColorStop(0, '#f2f8ff');
+          bgGrad.addColorStop(0.45, '#fff2f7');
+          bgGrad.addColorStop(1, '#ffebf2');
+        }
+        this.ctx.fillStyle = bgGrad;
+        this.ctx.fillRect(0, 0, this.vWidth, this.vHeight);
+
+        this.drawAmbientAtmosphere(this.ctx);
+
+        // 关卡持续崩坏时的深层背景幽灵文字烙印
+        if (this.isLevelCorrupted && this.state !== 'TITLE') {
+          this.ctx.save();
+          this.ctx.textAlign = 'center';
+          this.ctx.textBaseline = 'middle';
+          this.ctx.font = '900 38px "M PLUS Rounded 1c", sans-serif';
+
+          if (this.inGameCorruptionStage === 2) {
+            this.ctx.fillStyle = 'rgba(224, 82, 127, 0.07)';
+            this.ctx.fillText('没关系……没关系的……', this.vWidth / 2, this.vHeight * 0.62);
+          } else if (this.inGameCorruptionStage === 3) {
+            this.ctx.fillStyle = 'rgba(147, 51, 234, 0.12)';
+            this.ctx.font = '900 44px "M PLUS Rounded 1c", sans-serif';
+            this.ctx.fillText('看着我就好了', this.vWidth / 2, this.vHeight * 0.62);
+          } else {
+            this.ctx.fillStyle = 'rgba(255, 0, 60, 0.18)';
+            this.ctx.font = '900 48px "Share Tech Mono", monospace';
+            this.ctx.fillText('JUST MONIKA', this.vWidth / 2, this.vHeight * 0.62);
+          }
+          this.ctx.restore();
+        }
+
+        if (this.state !== 'TITLE') {
+          this.brickGrid.draw(this.ctx);
+          for (const drop of this.drops) drop.draw(this.ctx);
+          this.paddle.draw(this.ctx, this.pierceTimer > 0);
+          for (const ball of this.balls) ball.draw(this.ctx, this.pierceTimer > 0);
+        }
+
+        this.particles.draw(this.ctx);
+
+        // 关卡进行中偶发的轻微 CRT 画面切片错位撕裂（不阻挡小球与操作）
+        if (this.isLevelCorrupted && this.state === 'PLAYING') {
+          this.inGameGlitchSliceTimer--;
+          if (this.inGameGlitchSliceTimer <= 0) {
+            this.inGameGlitchSliceTimer = Math.floor(Math.random() * 140 + 90);
+            this.inGameGlitchActiveFrames = Math.floor(Math.random() * 3 + 2);
+            this.inGameGlitchY = Math.random() * (this.vHeight - 50);
+            this.inGameGlitchH = Math.random() * 30 + 10;
+            this.inGameGlitchShift = (Math.random() - 0.5) * 22;
+          }
+
+          if (this.inGameGlitchActiveFrames > 0) {
+            this.inGameGlitchActiveFrames--;
+            this.ctx.save();
+            this.ctx.drawImage(
+              this.canvas,
+              0, this.inGameGlitchY, this.vWidth, this.inGameGlitchH,
+              this.inGameGlitchShift, this.inGameGlitchY, this.vWidth, this.inGameGlitchH
+            );
+            this.ctx.fillStyle = this.inGameCorruptionStage >= 3 ? 'rgba(147, 51, 234, 0.18)' : 'rgba(255, 0, 70, 0.12)';
+            this.ctx.fillRect(0, this.inGameGlitchY, this.vWidth, this.inGameGlitchH);
+            this.ctx.restore();
+          }
+        }
+
+        if (this.glitchTimer > 0) {
+          const sliceCount = Math.floor(Math.random() * 5) + 3;
+          for (let i = 0; i < sliceCount; i++) {
+            const sy = Math.random() * this.vHeight;
+            const sh = Math.random() * 28 + 8;
+            const shiftX = (Math.random() - 0.5) * 40;
+            this.ctx.drawImage(
+              this.canvas,
+              0, sy, this.vWidth, sh,
+              shiftX, sy, this.vWidth, sh
+            );
+            this.ctx.fillStyle = Math.random() > 0.5 ? 'rgba(255, 0, 80, 0.2)' : 'rgba(0, 0, 0, 0.3)';
+            this.ctx.fillRect(0, sy, this.vWidth, sh);
+          }
+        }
+
+        this.ctx.restore();
+      }
+
+      loop() {
+        this.update();
+        this.render();
+        requestAnimationFrame(() => this.loop());
+      }
+    }
+
+    window.addEventListener('load', () => {
+      const game = new DDLCGameController();
+      game.loop();
+    });
+  </script>
+</body>
+</html>
